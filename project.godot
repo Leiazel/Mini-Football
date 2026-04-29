@@ -13,6 +13,7 @@ config_version=5
 config/name="Mini-Football"
 run/main_scene="uid://ekeiy2cbjxom"
 config/features=PackedStringArray("4.6", "GL Compatibility")
+run/max_fps=60
 config/icon="res://icon.svg"
 
 [editor]

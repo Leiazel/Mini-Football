@@ -38,9 +38,10 @@ offset_right = 1431.0
 offset_bottom = 721.0
 texture = ExtResource("1_fw4w5")
 
-[node name="Haaland" parent="." unique_id=875312009 node_paths=PackedStringArray("pelota", "porteria_enemiga") instance=ExtResource("3_fw4w5")]
+[node name="Haaland" parent="." unique_id=875312009 node_paths=PackedStringArray("objetivo", "pelota", "porteria_enemiga") instance=ExtResource("3_fw4w5")]
 position = Vector2(1094, 343)
 script = ExtResource("5_5ckkb")
+objetivo = NodePath("../Bergvall")
 pelota = NodePath("../Pelota")
 porteria_enemiga = NodePath("../Porteria_i/ZonaTiro")
 velocidad_normal = 160
