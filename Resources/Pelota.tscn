@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://bjph2mxrsxx7k"]
+
+[ext_resource type="Texture2D" uid="uid://btdxongodwthg" path="res://Images/soccer-ball-isolated.png" id="1_scuwd"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_scuwd"]
+bounce = 0.7
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ecieb"]
+radius = 8.0
+
+[node name="Pelota" type="RigidBody2D" unique_id=1192754175]
+physics_material_override = SubResource("PhysicsMaterial_scuwd")
+gravity_scale = 0.0
+contact_monitor = true
+max_contacts_reported = 4
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1963855191]
+position = Vector2(2.570152e-07, 8.1777637e-07)
+scale = Vector2(0.013000001, 0.012910167)
+texture = ExtResource("1_scuwd")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=694013305]
+shape = SubResource("CircleShape2D_ecieb")

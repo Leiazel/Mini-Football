@@ -1,0 +1,321 @@
+[gd_scene format=3 uid="uid://cdvp2yfyq68ql"]
+
+[ext_resource type="Script" uid="uid://dlxus2noi75he" path="res://Players/jugador_base.gd" id="1_5r5l2"]
+[ext_resource type="Texture2D" uid="uid://dqg7k6fxski4j" path="res://SpriteSheets/character-spritesheet (1).png" id="2_ktsqg"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_5r5l2"]
+radius = 12.0
+height = 53.0
+
+[sub_resource type="Animation" id="Animation_fw4w5"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame_coords")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [Vector2i(0, 40)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CollisionShape2D:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0.5, 6.5)]
+}
+
+[sub_resource type="Animation" id="Animation_otwa2"]
+resource_name = "caminar_abajo"
+length = 1.8333334
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame_coords")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(-0.1, 0.13333334, 0.36666667, 0.6333333, 0.9, 1.2, 1.4333333, 3.4666667, 5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [Vector2i(0, 40), Vector2i(1, 40), Vector2i(2, 40), Vector2i(4, 40), Vector2i(5, 40), Vector2i(6, 40), Vector2i(7, 40), Vector2i(8, 40), Vector2i(2, 40)]
+}
+
+[sub_resource type="Animation" id="Animation_lgngo"]
+resource_name = "caminar_arriba"
+length = 1.9333333
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame_coords")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(-0.06666667, 0.16666667, 0.4, 0.6666667, 0.93333334, 1.2, 1.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [Vector2i(0, 38), Vector2i(1, 38), Vector2i(2, 38), Vector2i(4, 38), Vector2i(5, 38), Vector2i(6, 38), Vector2i(7, 38)]
+}
+
+[sub_resource type="Animation" id="Animation_aou4a"]
+resource_name = "caminar_derecha"
+length = 2.0666666
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame_coords")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(-0.16666667, 0.1, 0.33333334, 0.6333333, 0.8666667, 1.1333333, 1.4333333, 1.7333333),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [Vector2i(0, 41), Vector2i(1, 41), Vector2i(2, 41), Vector2i(3, 41), Vector2i(4, 41), Vector2i(5, 41), Vector2i(6, 41), Vector2i(7, 41)]
+}
+
+[sub_resource type="Animation" id="Animation_5ckkb"]
+resource_name = "caminar_izquierda"
+length = 2.1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame_coords")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(-0.1, 0.13333334, 0.36666667, 0.6333333, 0.9, 1.1666666, 1.4, 1.6666666),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [Vector2i(0, 39), Vector2i(1, 39), Vector2i(2, 39), Vector2i(3, 39), Vector2i(4, 39), Vector2i(5, 39), Vector2i(6, 39), Vector2i(7, 39)]
+}
+
+[sub_resource type="Animation" id="Animation_5r5l2"]
+resource_name = "patear_abajo"
+length = 1.0333333
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame_coords")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(-0.06666667, 0.2, 0.46666667),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [Vector2i(0, 40), Vector2i(1, 40), Vector2i(3, 40)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CollisionShape2D:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.100000024, 0.8666667),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0.5, 9), Vector2(0.5, 6.5)]
+}
+
+[sub_resource type="Animation" id="Animation_ktsqg"]
+resource_name = "patear_arriba"
+length = 1.0333333
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame_coords")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.033333335, 0.3, 0.6),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [Vector2i(0, 38), Vector2i(2, 38), Vector2i(3, 38)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CollisionShape2D:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.04, 0.84, 0.86),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0.5, 6.4426355), Vector2(0.5, 6.4426355), Vector2(0.5, 3.1926355)]
+}
+
+[sub_resource type="Animation" id="Animation_b1t2o"]
+resource_name = "patear_derecha"
+length = 0.8
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame_coords")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.033333335, 0.36666667),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Vector2i(2, 41), Vector2i(3, 41)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CollisionShape2D:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.13333333, 0.7, 1.7),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(0.5, 3.919066), Vector2(3, 3.919066), Vector2(0.5, 3.919066)]
+}
+
+[sub_resource type="Animation" id="Animation_8p0hg"]
+resource_name = "patear_izquierda"
+length = 0.8333333
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame_coords")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.0134, 0.43333334),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Vector2i(2, 39), Vector2i(3, 39)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("CollisionShape2D:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0.46666667, 0.8),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-1.4616561, 3.919066), Vector2(2.0766883, 3.919066)]
+}
+
+[sub_resource type="Animation" id="Animation_2hh7m"]
+resource_name = "quieto_abajo"
+length = 0.8333333
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame_coords")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.4),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Vector2i(0, 24), Vector2i(1, 24)]
+}
+
+[sub_resource type="Animation" id="Animation_t8jxu"]
+resource_name = "quieto_arriba"
+length = 0.8333333
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame_coords")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.43333334),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Vector2i(0, 22), Vector2i(1, 22)]
+}
+
+[sub_resource type="Animation" id="Animation_pfhxm"]
+resource_name = "quieto_derecha"
+length = 0.8333333
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame_coords")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.42),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Vector2i(0, 25), Vector2i(1, 25)]
+}
+
+[sub_resource type="Animation" id="Animation_pij3u"]
+resource_name = "quieto_izquierda"
+length = 0.8333333
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite2D:frame_coords")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.42),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Vector2i(0, 23), Vector2i(1, 23)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_aou4a"]
+_data = {
+&"RESET": SubResource("Animation_fw4w5"),
+&"caminar_abajo": SubResource("Animation_otwa2"),
+&"caminar_arriba": SubResource("Animation_lgngo"),
+&"caminar_derecha": SubResource("Animation_aou4a"),
+&"caminar_izquierda": SubResource("Animation_5ckkb"),
+&"patear_abajo": SubResource("Animation_5r5l2"),
+&"patear_arriba": SubResource("Animation_ktsqg"),
+&"patear_derecha": SubResource("Animation_b1t2o"),
+&"patear_izquierda": SubResource("Animation_8p0hg"),
+&"quieto_abajo": SubResource("Animation_2hh7m"),
+&"quieto_arriba": SubResource("Animation_t8jxu"),
+&"quieto_derecha": SubResource("Animation_pfhxm"),
+&"quieto_izquierda": SubResource("Animation_pij3u")
+}
+
+[node name="Bergvall" type="CharacterBody2D" unique_id=875312009]
+motion_mode = 1
+safe_margin = 0.01
+script = ExtResource("1_5r5l2")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=183403524]
+position = Vector2(0.25, 0)
+scale = Vector2(1.0072464, 1)
+texture = ExtResource("2_ktsqg")
+hframes = 13
+vframes = 54
+frame = 520
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=90193303]
+position = Vector2(0.5, 6.5)
+shape = SubResource("CapsuleShape2D_5r5l2")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=688765630]
+libraries/ = SubResource("AnimationLibrary_aou4a")
+
+[node name="CooldownPateo" type="Timer" parent="." unique_id=1152982248]
+wait_time = 0.2
+one_shot = true

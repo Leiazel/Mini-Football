@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://n6np2a8vpaw6"]
+
+[ext_resource type="Script" uid="uid://cbvayd0bf0qe3" path="res://porteria.gd" id="1_tghm2"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_t7vw5"]
+size = Vector2(92, 161)
+
+[node name="Porteria" type="Node2D" unique_id=104851916]
+script = ExtResource("1_tghm2")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=874958660]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D" unique_id=1502326820]
+position = Vector2(48, 83)
+shape = SubResource("RectangleShape2D_t7vw5")

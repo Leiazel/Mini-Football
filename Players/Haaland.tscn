@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://kponv5kvkau"]
+
+[ext_resource type="PackedScene" uid="uid://cdvp2yfyq68ql" path="res://Players/jugador_base.tscn" id="1_i0o4x"]
+[ext_resource type="Texture2D" uid="uid://bi73l5dbdyuj" path="res://SpriteSheets/Haaland-spritesheet.png" id="2_y2r2y"]
+
+[node name="Haaland" unique_id=875312009 instance=ExtResource("1_i0o4x")]
+
+[node name="TimerDecision" type="Timer" parent="." index="0" unique_id=2056516971]
+wait_time = 0.25
+one_shot = true
+
+[node name="Sprite2D" parent="." index="1" unique_id=183403524]
+texture = ExtResource("2_y2r2y")
