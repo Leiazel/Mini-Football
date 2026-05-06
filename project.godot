@@ -16,9 +16,17 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 run/max_fps=60
 config/icon="res://icon.svg"
 
+[autoload]
+
+EstadoEquipo="*uid://c2eja422bj23d"
+
 [editor]
 
 movie_writer/movie_file="C:/Users/outlet/Documents/football-eleven/videos/demo_futbol.avi"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/estadoequipo/plugin.cfg")
 
 [input]
 

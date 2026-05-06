@@ -5,8 +5,10 @@
 [ext_resource type="PackedScene" uid="uid://kponv5kvkau" path="res://Players/Haaland.tscn" id="3_fw4w5"]
 [ext_resource type="Script" uid="uid://5uoo1tge6ol4" path="res://Players/HaalandScript.gd" id="5_5ckkb"]
 [ext_resource type="PackedScene" uid="uid://bjph2mxrsxx7k" path="res://Resources/Pelota.tscn" id="5_aou4a"]
+[ext_resource type="Script" uid="uid://dgxnuij86d2ci" path="res://Players/gunnarsson.gd" id="6_pfhxm"]
 [ext_resource type="Script" uid="uid://cbvayd0bf0qe3" path="res://Resources/porteria.gd" id="7_2hh7m"]
 [ext_resource type="Script" uid="uid://x6cc7xb71ehc" path="res://Resources/label.gd" id="7_t8jxu"]
+[ext_resource type="PackedScene" uid="uid://c3iuusf65nprr" path="res://Players/Gunnarsson.tscn" id="8_t8jxu"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_aou4a"]
 bounce = 0.8
@@ -39,7 +41,7 @@ offset_bottom = 721.0
 texture = ExtResource("1_fw4w5")
 
 [node name="Haaland" parent="." unique_id=875312009 node_paths=PackedStringArray("objetivo", "pelota", "porteria_enemiga") instance=ExtResource("3_fw4w5")]
-position = Vector2(1094, 343)
+position = Vector2(521, 131)
 script = ExtResource("5_5ckkb")
 objetivo = NodePath("../Bergvall")
 pelota = NodePath("../Pelota")
@@ -49,10 +51,19 @@ distancia_control = 60.0
 angulo_aceptable = 45.0
 
 [node name="Bergvall" parent="." unique_id=2090350225 instance=ExtResource("2_lgngo")]
-position = Vector2(250, 345)
+position = Vector2(512, 399)
+
+[node name="Gunnarsson" parent="." unique_id=1960203508 node_paths=PackedStringArray("pelota", "porteria_propia", "jugador_humano") instance=ExtResource("8_t8jxu")]
+position = Vector2(1122, 335)
+script = ExtResource("6_pfhxm")
+pelota = NodePath("../Pelota")
+porteria_propia = NodePath("../Porteria_d")
+jugador_humano = NodePath("../Bergvall")
+velocidad_normal = 155
+radio_salida = 500.0
 
 [node name="Pelota" parent="." unique_id=1192754175 instance=ExtResource("5_aou4a")]
-position = Vector2(710, 336)
+position = Vector2(1037, 409)
 mass = 2.0
 physics_material_override = SubResource("PhysicsMaterial_aou4a")
 continuous_cd = 1
