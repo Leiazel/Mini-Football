@@ -3,7 +3,7 @@ extends "res://Players/jugador_base.gd"
 @export var pelota: RigidBody2D
 @export var porteria_propia: Node2D
 @export var jugador_humano: CharacterBody2D
-@export var velocidad_normal = 155
+@export var velocidad_normal = 148
 @export var radio_salida = 500.0
 
 var timer_anim_pateo := 0.1
@@ -30,7 +30,7 @@ func _physics_process(_delta):
 	var dist_humano_pelota = jugador_humano.global_position.distance_to(pos_pelota)
 	var dir_despeje       = (pos_pelota - pos_arco).normalized()
 	var humano_tiene_pelota = dist_humano_pelota < dist_pelota - 20.0
-	var pos_cobertura     = pos_arco + (pos_pelota - pos_arco).normalized() * 250.0
+	var pos_cobertura     = pos_arco + (pos_pelota - pos_arco).normalized() * 260.0
 	var dist_a_cobertura  = global_position.distance_to(pos_cobertura)
 
 	# 2. TRANSICIONES

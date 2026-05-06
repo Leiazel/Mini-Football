@@ -29,7 +29,7 @@ func _physics_process(_delta):
 	var pos_arco    = porteria_enemiga.global_position
 	var dist_pelota = global_position.distance_to(pos_pelota)
 	var dir_tiro    = (pos_arco - pos_pelota).normalized()
-	var punto_detras = pos_pelota - (dir_tiro * 70.0)
+	var punto_detras = pos_pelota - (dir_tiro * 50.0)
 	var hacia_pelota_norm = (pos_pelota - global_position).normalized()
 	var estoy_estorbando = hacia_pelota_norm.dot(dir_tiro) < -0.2
 
@@ -126,22 +126,3 @@ func _physics_process(_delta):
 
 	if timer_anim_pateo <= 0.0:
 		actualizar_animaciones()
-
-func actualizar_animaciones():
-	if velocity.length() > 10:
-		if abs(direccion.x) > abs(direccion.y):
-			if direccion.x > 0:
-				animador.play("caminar_derecha")
-				ultima_direccion = "derecha"
-			else:
-				animador.play("caminar_izquierda")
-				ultima_direccion = "izquierda"
-		else:
-			if direccion.y > 0:
-				animador.play("caminar_abajo")
-				ultima_direccion = "abajo"
-			else:
-				animador.play("caminar_arriba")
-				ultima_direccion = "arriba"
-	else:
-		animador.play("quieto_" + ultima_direccion)
