@@ -6,7 +6,7 @@ extends "res://Players/jugador_base.gd"
 @export var velocidad_normal = 155
 @export var radio_salida = 500.0
 
-var timer_anim_pateo := 0.0
+var timer_anim_pateo := 0.1
 var en_posicion := false  # evita el bucle de GUARDAR_POSICION
 
 enum Estado { GUARDAR_POSICION, CORTAR, DECIDIR }
@@ -103,11 +103,11 @@ func _physics_process(_delta):
 		if puede_pasar:
 			var dir_pase = (EstadoEquipo.pos_delantero - pos_pelota).normalized()
 			var dist_a_delantero = pos_pelota.distance_to(EstadoEquipo.pos_delantero)
-			var fuerza_pase = clamp(dist_a_delantero * 3.5, 600.0, 1400.0)
+			var fuerza_pase = clamp(dist_a_delantero * 6.5, 3300.0, 4400.0)		
 			pelota.apply_central_impulse(dir_pase * fuerza_pase)
 			print("¡Pase realizado al delantero!") # Debug para tu consola
 		else:
-			var fuerza_despeje = 1400.0 if dist_arco_pelota < 150.0 else 800.0
+			var fuerza_despeje = 2400.0 if dist_arco_pelota < 500.0 else 800.0
 			pelota.apply_central_impulse(dir_despeje * fuerza_despeje)
 			print("Despeje efectuado")
 
@@ -123,7 +123,6 @@ func _physics_process(_delta):
 	if timer_anim_pateo <= 0.0:
 		actualizar_animaciones()
 
-func actualizar_animaciones():
 	if velocity.length() > 10:
 		if abs(direccion.x) > abs(direccion.y):
 			if direccion.x > 0:
