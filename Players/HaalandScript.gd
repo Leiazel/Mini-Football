@@ -51,16 +51,14 @@ func _physics_process(_delta):
 
 	# 3. Si el compañero tiene la pelota → desmarcarse hacia adelante
 	if compañero_cerca:
-		estoy_estorbando = false
-	# Punto intermedio: 40% del camino entre la pelota y el arco
-		var punto_intermedio = pos_pelota + (pos_arco - pos_pelota) * 0.4
-		var dir_objetivo = (punto_intermedio - global_position).normalized()
-		direccion = direccion.lerp(dir_objetivo, 0.10)
-		velocity = direccion * velocidad_normal * 0.8
-		move_and_slide()
-		if timer_anim_pateo <= 0.0:
-			actualizar_animaciones()
-		return
+			var punto_intermedio = pos_pelota + (pos_arco - pos_pelota) * 0.4
+			var dir_compañero = (punto_intermedio - global_position).normalized()  # ← nombre distinto
+			direccion = direccion.lerp(dir_compañero, 0.10)
+			velocity = direccion * velocidad_normal * 0.8
+			move_and_slide()
+			if timer_anim_pateo <= 0.0:
+				actualizar_animaciones()
+			return
 
 	# 4. TRANSICIONES DE ESTADO
 	match estado:
