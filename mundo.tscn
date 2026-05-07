@@ -12,7 +12,6 @@
 [ext_resource type="Script" uid="uid://bf484ke2x1x1g" path="res://Resources/marcador.gd" id="10_pij3u"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_aou4a"]
-friction = 0.88
 bounce = 0.8
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_aou4a"]
@@ -43,7 +42,7 @@ offset_bottom = 721.0
 texture = ExtResource("1_fw4w5")
 
 [node name="Haaland" parent="." unique_id=875312009 node_paths=PackedStringArray("objetivo", "pelota", "porteria_enemiga", "compañero") instance=ExtResource("3_fw4w5")]
-position = Vector2(882, 376)
+position = Vector2(741, 160)
 script = ExtResource("5_5ckkb")
 objetivo = NodePath("../Bergvall")
 pelota = NodePath("../Pelota")
@@ -57,16 +56,16 @@ angulo_aceptable = 45.0
 position = Vector2(512, 399)
 
 [node name="Gunnarsson" parent="." unique_id=1960203508 node_paths=PackedStringArray("pelota", "porteria_propia", "jugador_humano") instance=ExtResource("8_t8jxu")]
-position = Vector2(1186, 449)
+position = Vector2(945, 413)
 script = ExtResource("6_pfhxm")
 pelota = NodePath("../Pelota")
 porteria_propia = NodePath("../Porteria_d")
 jugador_humano = NodePath("../Bergvall")
 velocidad_normal = 148
-radio_salida = 500.0
+radio_salida = 400.0
 
 [node name="Pelota" parent="." unique_id=1192754175 instance=ExtResource("5_aou4a")]
-position = Vector2(565, 454)
+position = Vector2(970, 543)
 mass = 2.0
 physics_material_override = SubResource("PhysicsMaterial_aou4a")
 continuous_cd = 1

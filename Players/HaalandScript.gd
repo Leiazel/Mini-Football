@@ -3,7 +3,7 @@ extends "res://Players/jugador_base.gd"
 @export var objetivo: CharacterBody2D
 @export var pelota: RigidBody2D
 @export var porteria_enemiga: Node2D
-@export var compañero: CharacterBody2D  # ← NUEVO: arrastrá a Gunnarsson acá en el Inspector
+@export var compañero: CharacterBody2D
 @export var velocidad_normal = 160
 @export var distancia_control = 60.0
 @export var angulo_aceptable = 45.0
@@ -24,7 +24,6 @@ func _physics_process(_delta):
 
 	timer_anim_pateo -= _delta
 
-	# 1. DATOS BÁSICOS
 	var pos_pelota  = pelota.global_position
 	var pos_arco    = porteria_enemiga.global_position
 	var dist_pelota = global_position.distance_to(pos_pelota)
@@ -33,34 +32,28 @@ func _physics_process(_delta):
 	var hacia_pelota_norm = (pos_pelota - global_position).normalized()
 	var estoy_estorbando = hacia_pelota_norm.dot(dir_tiro) < -0.2
 
-	# ← NUEVO: detección directa — ¿el compañero está más cerca de la pelota que yo?
 	var compañero_cerca = false
 	if compañero:
 		var dist_compañero = compañero.global_position.distance_to(pos_pelota)
-		# El compañero "tiene" la pelota si está significativamente más cerca que Haaland
 		compañero_cerca = dist_compañero < dist_pelota - 40.0 and dist_compañero < 120.0
 
-	# 2. AVISAR AL SINGLETON — siempre, independiente de compañero_cerca
-	# 2. AVISAR AL SINGLETON
 	EstadoEquipo.pos_delantero = global_position
 	if compañero_cerca:
-		estoy_estorbando = false  # adelante de la pelota es donde debe estar
+		estoy_estorbando = false
 	EstadoEquipo.delantero_listo_para_recibir = true if compañero_cerca else (
 		estado != Estado.REMATAR and not estoy_estorbando
 	)
 
-	# 3. Si el compañero tiene la pelota → desmarcarse hacia adelante
 	if compañero_cerca:
-			var punto_intermedio = pos_pelota + (pos_arco - pos_pelota) * 0.4
-			var dir_compañero = (punto_intermedio - global_position).normalized()  # ← nombre distinto
-			direccion = direccion.lerp(dir_compañero, 0.10)
-			velocity = direccion * velocidad_normal * 0.8
-			move_and_slide()
-			if timer_anim_pateo <= 0.0:
-				actualizar_animaciones()
-			return
+		var punto_intermedio = pos_pelota + (pos_arco - pos_pelota) * 0.4
+		var dir_compañero = (punto_intermedio - global_position).normalized()
+		direccion = direccion.lerp(dir_compañero, 0.10)
+		velocity = direccion * velocidad_normal * 0.8
+		move_and_slide()
+		if timer_anim_pateo <= 0.0:
+			actualizar_animaciones()
+		return
 
-	# 4. TRANSICIONES DE ESTADO
 	match estado:
 		Estado.BUSCAR:
 			if dist_pelota < 400.0 and not estoy_estorbando:
@@ -74,7 +67,6 @@ func _physics_process(_delta):
 			if dist_pelota > 120.0:
 				estado = Estado.BUSCAR
 
-	# 5. DESTINO SEGÚN ESTADO
 	var destino: Vector2
 	if dist_pelota > 400.0:
 		destino = pos_pelota
@@ -89,7 +81,6 @@ func _physics_process(_delta):
 			Estado.PREPARAR:  destino = punto_detras
 			Estado.REMATAR:   destino = pos_pelota
 
-	# 6. MOVIMIENTO
 	if estado == Estado.PREPARAR:
 		velocidad_actual = velocidad_normal * 0.7
 	elif estado == Estado.REMATAR:
@@ -99,7 +90,6 @@ func _physics_process(_delta):
 	direccion = direccion.lerp(dir_objetivo, 0.12)
 	velocity = direccion * velocidad_actual
 
-	# 7. PATEO
 	var cerca_del_arco = pos_pelota.distance_to(pos_arco) < 500.0
 	move_and_slide()
 
@@ -110,19 +100,42 @@ func _physics_process(_delta):
 			break
 
 	if tocando_pelota and timer_pateo.is_stopped():
-		if cerca_del_arco and puede_rematar:
-			pelota.apply_central_impulse(dir_tiro * 2200.0)
-			timer_pateo.start()
-			timer_anim_pateo = 0.4
-			puede_rematar = false
-			velocity = velocity * 0.1
-			direccion = direccion * 0.1
-			get_tree().create_timer(1.5).connect("timeout", func(): puede_rematar = true)
-		elif not cerca_del_arco and not estoy_estorbando:
-			pelota.apply_central_impulse(dir_tiro * 320.0)
-			timer_pateo.start()
-		elif estoy_estorbando:
-			velocity *= 0.8
+		ejecutar_accion_con_pelota(dir_tiro, cerca_del_arco, pos_arco, estoy_estorbando)
 
 	if timer_anim_pateo <= 0.0:
 		actualizar_animaciones()
+
+# ← Función virtual: Gunnarsson la sobreescribe, Haaland la usa directo
+func ejecutar_accion_con_pelota(dir_tiro: Vector2, cerca_del_arco: bool, pos_arco: Vector2, estoy_estorbando: bool):
+	if cerca_del_arco and puede_rematar:
+		pelota.apply_central_impulse(dir_tiro * 2200.0)
+		timer_pateo.start()
+		timer_anim_pateo = 0.4
+		puede_rematar = false
+		velocity = velocity * 0.1
+		direccion = direccion * 0.1
+		get_tree().create_timer(1.5).connect("timeout", func(): puede_rematar = true)
+	elif not cerca_del_arco and not estoy_estorbando:
+		pelota.apply_central_impulse(dir_tiro * 320.0)
+		timer_pateo.start()
+	elif estoy_estorbando:
+		velocity *= 0.8
+
+func actualizar_animaciones():
+	if velocity.length() > 10:
+		if abs(direccion.x) > abs(direccion.y):
+			if direccion.x > 0:
+				animador.play("caminar_derecha")
+				ultima_direccion = "derecha"
+			else:
+				animador.play("caminar_izquierda")
+				ultima_direccion = "izquierda"
+		else:
+			if direccion.y > 0:
+				animador.play("caminar_abajo")
+				ultima_direccion = "abajo"
+			else:
+				animador.play("caminar_arriba")
+				ultima_direccion = "arriba"
+	else:
+		animador.play("quieto_" + ultima_direccion)

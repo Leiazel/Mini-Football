@@ -4,7 +4,7 @@ extends "res://Players/jugador_base.gd"
 @export var porteria_propia: Node2D
 @export var jugador_humano: CharacterBody2D
 @export var velocidad_normal = 148
-@export var radio_salida = 500.0
+@export var radio_salida = 700.0
 
 var timer_anim_pateo := 0.1
 var en_posicion := false  # evita el bucle de GUARDAR_POSICION
@@ -29,8 +29,8 @@ func _physics_process(_delta):
 	var dist_arco_pelota  = pos_arco.distance_to(pos_pelota)
 	var dist_humano_pelota = jugador_humano.global_position.distance_to(pos_pelota)
 	var dir_despeje       = (pos_pelota - pos_arco).normalized()
-	var humano_tiene_pelota = dist_humano_pelota < dist_pelota - 20.0
-	var pos_cobertura     = pos_arco + (pos_pelota - pos_arco).normalized() * 260.0
+	var humano_tiene_pelota = dist_humano_pelota < dist_pelota - 10.0
+	var pos_cobertura     = pos_arco + (pos_pelota - pos_arco).normalized() * 450.0
 	var dist_a_cobertura  = global_position.distance_to(pos_cobertura)
 
 	# 2. TRANSICIONES
@@ -61,8 +61,12 @@ func _physics_process(_delta):
 	match estado:
 		Estado.GUARDAR_POSICION:
 			destino = pos_cobertura
-			# Si ya está en posición, velocidad cero para no temblar
-			velocidad_actual = 0.0 if en_posicion else velocidad_normal * 0.8
+		# Si la pelota está muy cerca, nunca frenar — siempre actuar
+			if dist_pelota < 60.0:
+				velocidad_actual = velocidad_normal
+				estado = Estado.DECIDIR  # forzar DECIDIR si la pelota está pegada
+			else:
+				velocidad_actual = 0.0 if en_posicion else velocidad_normal * 0.8
 		Estado.CORTAR:
 			destino = pos_pelota
 		Estado.DECIDIR:
@@ -83,7 +87,7 @@ func _physics_process(_delta):
 			break
 			
 	# Fallback por cercanía
-	if dist_pelota < 35.0 and estado == Estado.DECIDIR:
+	if dist_pelota < 20.0:
 		tocando_pelota = true
 
 	# ACTUALIZACIÓN DE ESTADO EQUIPO: Si está en zona de decisión e interactuando, el compañero TIENE la pelota
@@ -94,18 +98,30 @@ func _physics_process(_delta):
 		if estado != Estado.DECIDIR:
 			EstadoEquipo.compañero_tiene_pelota = false
 
-	if tocando_pelota and timer_pateo.is_stopped() and estado == Estado.DECIDIR:
+	if tocando_pelota and timer_pateo.is_stopped() and (estado == Estado.DECIDIR or estado == Estado.CORTAR):
 		var puede_pasar = (
 			EstadoEquipo.delantero_listo_para_recibir and
 			EstadoEquipo.pos_delantero != Vector2.ZERO
 		)
 
 		if puede_pasar:
-			var dir_pase = (EstadoEquipo.pos_delantero - pos_pelota).normalized()
-			var dist_a_delantero = pos_pelota.distance_to(EstadoEquipo.pos_delantero)
-			var fuerza_pase = clamp(dist_a_delantero * 6.5, 3300.0, 4400.0)		
-			pelota.apply_central_impulse(dir_pase * fuerza_pase)
-			print("¡Pase realizado al delantero!") # Debug para tu consola
+			var dir_a_haaland = (EstadoEquipo.pos_delantero - global_position).normalized()
+			var dir_a_pelota  = (pos_pelota - global_position).normalized()
+			var angulo_pase   = dir_a_haaland.dot(dir_a_pelota)
+
+			if angulo_pase > 0.2:
+				# Buen ángulo — pasar directo
+				var dir_pase = (EstadoEquipo.pos_delantero - pos_pelota).normalized()
+				var dist_a_delantero = pos_pelota.distance_to(EstadoEquipo.pos_delantero)
+				var fuerza_pase = clamp(dist_a_delantero * 6.5, 3300.0, 4400.0)
+				pelota.apply_central_impulse(dir_pase * fuerza_pase)
+				print("¡Pase realizado al delantero!")
+			else:
+				# Mal ángulo — pase lateral hacia donde está Haaland pero por el costado
+				# Rota 45 grados hacia Haaland para no tirarla para atrás
+				var dir_lateral = dir_despeje.rotated(deg_to_rad(45) * sign(dir_a_haaland.cross(dir_a_pelota)))
+				pelota.apply_central_impulse(dir_lateral * 2000.0)
+				print("Pase lateral")
 		else:
 			var fuerza_despeje = 2400.0 if dist_arco_pelota < 500.0 else 800.0
 			pelota.apply_central_impulse(dir_despeje * fuerza_despeje)
@@ -115,8 +131,6 @@ func _physics_process(_delta):
 		timer_anim_pateo = 0.35
 		velocity = velocity * 0.2
 		direccion = direccion * 0.2
-		
-		# IMPORTANTE: Apagamos la posesión porque ya pateamos, y cambiamos estado
 		EstadoEquipo.compañero_tiene_pelota = false
 		estado = Estado.GUARDAR_POSICION
 
