@@ -110,8 +110,8 @@ func iniciar_kickoff(equipo_que_saca: String = "local"):
 		p.activar_kickoff()
 
 func _process(delta: float):
-	# --- CAMBIO DE JUGADOR (Q) ---
-	if Input.is_key_pressed(KEY_Q) or Input.is_physical_key_pressed(KEY_Q):
+	# --- CAMBIO DE JUGADOR (R) ---
+	if Input.is_key_pressed(KEY_R) or Input.is_physical_key_pressed(KEY_R):
 		# Usamos un cooldown interno o solo just_pressed
 		pass # Lo manejamos mejor en _unhandled_input para evitar ráfagas
 		
@@ -233,7 +233,7 @@ func _finalizar_saque_arco():
 		
 func _unhandled_input(event):
 	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_Q:
+		if event.keycode == KEY_R:
 			_cambiar_jugador_activo()
 
 func _cambiar_jugador_activo():

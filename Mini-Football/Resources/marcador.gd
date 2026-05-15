@@ -19,7 +19,7 @@ func _on_gol_local():
 	# Si anota el local, saca el visitante
 	var mundo = get_tree().current_scene
 	if mundo and mundo.has_method("iniciar_kickoff"):
-		mundo.iniciar_kickoff("visitante")
+		mundo.call_deferred("iniciar_kickoff", "visitante")
 
 func _on_gol_visitante():
 	var label = get_tree().get_root().find_child("Label", true, false)
@@ -29,5 +29,5 @@ func _on_gol_visitante():
 	# Si anota el visitante, saca el local
 	var mundo = get_tree().current_scene
 	if mundo and mundo.has_method("iniciar_kickoff"):
-		mundo.iniciar_kickoff("local")
+		mundo.call_deferred("iniciar_kickoff", "local")
 
