@@ -1,0 +1,120 @@
+[gd_scene format=3 uid="uid://ekeiy2cbjxom"]
+
+[ext_resource type="Texture2D" uid="uid://b76xsg03veq6l" path="res://Images/41290.jpg" id="1_fw4w5"]
+[ext_resource type="Script" uid="uid://cg05smua4r4vj" path="res://Mundo.gd" id="1_mundo"]
+[ext_resource type="PackedScene" uid="uid://bjph2mxrsxx7k" path="res://Resources/Pelota.tscn" id="5_aou4a"]
+[ext_resource type="Script" uid="uid://cbvayd0bf0qe3" path="res://Resources/porteria.gd" id="7_2hh7m"]
+[ext_resource type="Script" uid="uid://x6cc7xb71ehc" path="res://Resources/label.gd" id="7_t8jxu"]
+[ext_resource type="Script" uid="uid://bf484ke2x1x1g" path="res://Resources/marcador.gd" id="10_pij3u"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_aou4a"]
+bounce = 0.8
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_paredes"]
+bounce = 0.5
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_aou4a"]
+size = Vector2(28, 1161)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5ckkb"]
+size = Vector2(37.5, 1155)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2hh7m"]
+size = Vector2(2163, 31.5)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_t8jxu"]
+size = Vector2(2173, 27)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pfhxm"]
+size = Vector2(56, 113)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pij3u"]
+size = Vector2(32, 109)
+
+[node name="Mundo" type="Node2D" unique_id=1521689208]
+script = ExtResource("1_mundo")
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=412229690]
+offset_left = -7.0
+offset_top = -49.0
+offset_right = 2146.0
+offset_bottom = 1081.0
+texture = ExtResource("1_fw4w5")
+
+[node name="Pelota" parent="." unique_id=2135837504 instance=ExtResource("5_aou4a")]
+position = Vector2(1080, 504)
+mass = 2.0
+physics_material_override = SubResource("PhysicsMaterial_aou4a")
+continuous_cd = 1
+linear_damp = 5.748
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=1607731864]
+physics_material_override = SubResource("PhysicsMaterial_paredes")
+
+[node name="izq" type="CollisionShape2D" parent="StaticBody2D" unique_id=1380999080]
+position = Vector2(88, 556)
+shape = SubResource("RectangleShape2D_aou4a")
+
+[node name="der" type="CollisionShape2D" parent="StaticBody2D" unique_id=1701022740]
+position = Vector2(2043, 495)
+shape = SubResource("RectangleShape2D_5ckkb")
+
+[node name="abajo" type="CollisionShape2D" parent="StaticBody2D" unique_id=1272967669]
+position = Vector2(1078, 1059)
+shape = SubResource("RectangleShape2D_2hh7m")
+
+[node name="arriba" type="CollisionShape2D" parent="StaticBody2D" unique_id=459523692]
+position = Vector2(1071, -40)
+shape = SubResource("RectangleShape2D_t8jxu")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1024473324]
+position = Vector2(1059, 493)
+zoom = Vector2(0.85, 0.85)
+limit_left = -10000001
+
+[node name="Label" type="Label" parent="." unique_id=1496411309]
+offset_left = 927.0
+offset_top = 9.0
+offset_right = 1219.0
+offset_bottom = 69.0
+theme_override_font_sizes/font_size = 28
+text = "  0 -0"
+script = ExtResource("7_t8jxu")
+
+[node name="Porteria_i" type="Area2D" parent="." unique_id=1638008257]
+position = Vector2(74, 505)
+script = ExtResource("7_2hh7m")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Porteria_i" unique_id=1555010627]
+position = Vector2(2, -1)
+shape = SubResource("RectangleShape2D_pfhxm")
+
+[node name="ZonaTiro" type="Marker2D" parent="Porteria_i" unique_id=766211635]
+
+[node name="Porteria_d" type="Area2D" parent="." unique_id=1848058249]
+position = Vector2(2031, 517)
+script = ExtResource("7_2hh7m")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Porteria_d" unique_id=1415712149]
+position = Vector2(-1, -8.5)
+shape = SubResource("RectangleShape2D_pij3u")
+
+[node name="ZonaTiroL" type="Marker2D" parent="Porteria_d" unique_id=1920981608]
+
+[node name="Node" type="Node" parent="." unique_id=787921101]
+script = ExtResource("10_pij3u")
+
+[node name="AvisoSaque" type="Label" parent="." unique_id=999999]
+visible = false
+offset_left = 345.0
+offset_top = 373.0
+offset_right = 1730.0
+offset_bottom = 548.0
+theme_override_colors/font_color = Color(1, 0.94902, 0, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 18
+theme_override_font_sizes/font_size = 62
+text = "¡SAQUE LOCAL!
+Presiona C o ESPACIO para sacar"
+horizontal_alignment = 1
+vertical_alignment = 1

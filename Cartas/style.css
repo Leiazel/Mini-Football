@@ -1,0 +1,624 @@
+:root {
+    --bg-dark: #0f172a;
+    --panel-bg: rgba(30, 41, 59, 0.7);
+    --field-green: #15803d;
+    --field-border: rgba(255, 255, 255, 0.2);
+    --primary: #3b82f6;
+    --accent: #f59e0b;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Efectos de fondo Glow */
+.background-effects {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+.glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.4;
+}
+.orb-1 {
+    width: 600px; height: 600px;
+    background: #3b82f6;
+    top: -200px; left: -100px;
+}
+.orb-2 {
+    width: 500px; height: 500px;
+    background: #8b5cf6;
+    bottom: -100px; right: -100px;
+}
+
+/* Header */
+header {
+    text-align: center;
+    padding: 2rem 0;
+    position: relative;
+    z-index: 10;
+}
+
+header h1 {
+    font-size: 3.5rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+header h1 span {
+    color: transparent;
+    -webkit-text-stroke: 2px var(--accent);
+}
+
+header p {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    font-weight: 300;
+}
+
+.btn-premium {
+    margin-top: 1.5rem;
+    padding: 12px 32px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(245, 158, 11, 0.3);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-premium:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 25px rgba(245, 158, 11, 0.5);
+}
+
+/* Agregado para el botón de completar al azar en el estilo original */
+.btn-random {
+    margin-top: 1.5rem;
+    margin-left: 10px;
+    padding: 12px 32px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-random:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 15px 25px rgba(79, 70, 229, 0.5);
+}
+
+.formation-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    margin-top: 20px;
+    background: rgba(15, 23, 42, 0.9);
+    padding: 20px 40px;
+    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(20px);
+    width: max-content;
+    margin: 20px auto;
+}
+
+.team-selector h3 {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+.button-group {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-formation {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    transition: all 0.3s;
+}
+
+.btn-formation:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-formation.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.4);
+}
+
+/* Layout Principal (Vertical: Campo arriba, Mazo abajo) */
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 1700px;
+    margin: 0 auto;
+    padding: 0 2rem 2rem;
+}
+
+.campo-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Campo de Fútbol Horizontal */
+#campo-futbol {
+    width: 1300px;
+    height: 700px;
+    background: linear-gradient(to right, #166534, #14532d);
+    border: 4px solid var(--field-border);
+    border-radius: 20px;
+    position: relative;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.5), inset 0 0 100px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: row; /* Horizontal */
+    overflow: hidden;
+}
+
+/* Patrón de césped vertical ahora (horizontal visualmente) */
+#campo-futbol::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: repeating-linear-gradient(
+        to right,
+        transparent,
+        transparent 50px,
+        rgba(255,255,255,0.03) 50px,
+        rgba(255,255,255,0.03) 100px
+    );
+    pointer-events: none;
+}
+
+.linea-central {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 3px;
+    height: 100%;
+    background-color: var(--field-border);
+    transform: translateX(-50%);
+    pointer-events: none;
+}
+
+.circulo-central {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    border: 3px solid var(--field-border);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.zona-equipo {
+    width: 50%;
+    height: 100%;
+    position: relative;
+    padding: 0;
+}
+
+.equipo-title {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: 1.5rem;
+    color: rgba(255,255,255,0.3);
+    letter-spacing: 5px;
+    font-weight: 900;
+    pointer-events: none;
+}
+
+.local .equipo-title { top: 320px; left: 50%; transform: translateX(-50%); opacity: 0.2; }
+.visitante .equipo-title { top: 320px; left: 50%; transform: translateX(-50%); opacity: 0.2; }
+
+/* Posiciones en el campo */
+.posicion {
+    width: 90px;
+    height: 125px;
+    border: 2px dashed rgba(255,255,255,0.4);
+    border-radius: 10px;
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0,0,0,0.1);
+    backdrop-filter: blur(2px);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.posicion.drag-over {
+    background: rgba(255,255,255,0.2);
+    border-color: #fff;
+    transform: scale(1.05);
+}
+
+.etiqueta {
+    position: absolute;
+    color: rgba(255,255,255,0.4);
+    font-weight: 700;
+    font-size: 1.2rem;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* --- FORMACIONES LOCAL (IZQUIERDA) --- */
+/* Común: Portero fijo */
+.local .pos-1 { left: 40px !important; top: 288px !important; }
+
+/* 2-1-2 (2 DEF, 1 MED, 2 DEL) */
+.local.f-2-1-2 .pos-2 { left: 160px !important; top: 120px !important; }
+.local.f-2-1-2 .pos-3 { left: 160px !important; top: 450px !important; }
+.local.f-2-1-2 .pos-4 { left: 330px !important; top: 288px !important; }
+.local.f-2-1-2 .pos-5 { left: 520px !important; top: 120px !important; }
+.local.f-2-1-2 .pos-6 { left: 520px !important; top: 450px !important; }
+
+/* 2-2-1 (2 DEF, 2 MED, 1 DEL) */
+.local.f-2-2-1 .pos-2 { left: 160px !important; top: 120px !important; }
+.local.f-2-2-1 .pos-3 { left: 160px !important; top: 450px !important; }
+.local.f-2-2-1 .pos-4 { left: 330px !important; top: 120px !important; }
+.local.f-2-2-1 .pos-5 { left: 330px !important; top: 450px !important; }
+.local.f-2-2-1 .pos-6 { left: 520px !important; top: 288px !important; }
+
+/* 1-2-2 (1 DEF, 2 MED, 2 DEL) */
+.local.f-1-2-2 .pos-2 { left: 160px !important; top: 288px !important; }
+.local.f-1-2-2 .pos-3 { left: 330px !important; top: 120px !important; }
+.local.f-1-2-2 .pos-4 { left: 330px !important; top: 450px !important; }
+.local.f-1-2-2 .pos-5 { left: 520px !important; top: 120px !important; }
+.local.f-1-2-2 .pos-6 { left: 520px !important; top: 450px !important; }
+
+/* --- FORMACIONES VISITANTE (DERECHA) --- */
+/* Común: Portero fijo */
+.visitante .pos-1 { right: 40px !important; top: 288px !important; left: auto !important; }
+
+/* 2-1-2 */
+.visitante.f-2-1-2 .pos-2 { right: 160px !important; top: 120px !important; left: auto !important; }
+.visitante.f-2-1-2 .pos-3 { right: 160px !important; top: 450px !important; left: auto !important; }
+.visitante.f-2-1-2 .pos-4 { right: 330px !important; top: 288px !important; left: auto !important; }
+.visitante.f-2-1-2 .pos-5 { right: 520px !important; top: 120px !important; left: auto !important; }
+.visitante.f-2-1-2 .pos-6 { right: 520px !important; top: 450px !important; left: auto !important; }
+
+/* 2-2-1 */
+.visitante.f-2-2-1 .pos-2 { right: 160px !important; top: 120px !important; left: auto !important; }
+.visitante.f-2-2-1 .pos-3 { right: 160px !important; top: 450px !important; left: auto !important; }
+.visitante.f-2-2-1 .pos-4 { right: 330px !important; top: 120px !important; left: auto !important; }
+.visitante.f-2-2-1 .pos-5 { right: 330px !important; top: 450px !important; left: auto !important; }
+.visitante.f-2-2-1 .pos-6 { right: 520px !important; top: 288px !important; left: auto !important; }
+
+/* 1-2-2 */
+.visitante.f-1-2-2 .pos-2 { right: 160px !important; top: 288px !important; left: auto !important; }
+.visitante.f-1-2-2 .pos-3 { right: 330px !important; top: 120px !important; left: auto !important; }
+.visitante.f-1-2-2 .pos-4 { right: 330px !important; top: 450px !important; left: auto !important; }
+.visitante.f-1-2-2 .pos-5 { right: 520px !important; top: 120px !important; left: auto !important; }
+.visitante.f-1-2-2 .pos-6 { right: 520px !important; top: 450px !important; left: auto !important; }
+
+/* Ajuste centrado tras drag & drop */
+.posicion .carta {
+    top: 0; left: 0;
+    position: relative;
+    transform: none !important;
+}
+
+/* Panel Inferior (Cartas horizontales) */
+.sidebar {
+    width: 100%;
+    background: var(--panel-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 500px; /* Aumentado para ver más cartas */
+    box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+}
+
+.sidebar-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sidebar-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.mazo {
+    padding: 20px;
+    overflow-y: auto; /* Scroll vertical */
+    overflow-x: hidden;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 20px;
+    justify-items: center;
+    flex: 1;
+}
+
+.mazo.drag-over {
+    background: rgba(255,255,255,0.05);
+}
+
+/* Diseño de Cartas (FUT Style) */
+.carta {
+    min-width: 90px; 
+    height: 125px;
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border: 2px solid #cbd5e1;
+    border-radius: 10px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    cursor: grab;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+}
+
+.carta.is-dragging {
+    opacity: 0.5;
+    cursor: grabbing;
+}
+
+.carta::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%; width: 50%; height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
+    transform: skewX(-20deg);
+    transition: 0.5s;
+    pointer-events: none;
+}
+
+.carta:hover::after {
+    left: 150%;
+}
+
+.carta.zoom {
+    transform: scale(2);
+    z-index: 1000;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+    position: absolute;
+}
+
+.carta:hover:not(.zoom, .is-dragging) {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+    border-color: var(--accent);
+}
+
+.foto-jugador {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    position: absolute;
+    top: 0; left: 0;
+    z-index: 1;
+    pointer-events: none;
+    transition: opacity 0.3s;
+}
+
+.nombre-jugador-fallback {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    color: #fff;
+    z-index: 2;
+    padding: 0 5px;
+    display: none;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.carta.no-image {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #0f172a 100%);
+    border-color: rgba(255,255,255,0.2);
+}
+
+.carta.no-image::before {
+    content: attr(data-rol);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    font-weight: 900;
+    color: rgba(255,255,255,0.03);
+    z-index: 0;
+}
+
+.carta.no-image .nombre-jugador-fallback {
+    display: block;
+}
+
+.carta.no-image .foto-jugador {
+    opacity: 0;
+}
+
+.posicion-jugador {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.2);
+    pointer-events: none;
+}
+
+/* Custom Scrollbar for Mazo Horizontal */
+.mazo::-webkit-scrollbar {
+    height: 10px;
+}
+.mazo::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.2);
+    border-radius: 4px;
+    margin: 0 15px;
+}
+.mazo::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.2);
+    border-radius: 4px;
+}
+/* Panel flotante global (anclado al body, evita overflow clipping) */
+#panel-acciones {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 9999;
+    background: rgba(10, 18, 36, 0.97);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 12px;
+    padding: 8px;
+    min-width: 130px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.05);
+    animation: slide-down 0.18s ease;
+}
+
+@keyframes slide-down {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* =======================================
+   BOTONES CONTEXTUALES DE CARTA (CLICK)
+======================================= */
+.carta.selected {
+    border-color: #f59e0b;
+    box-shadow: 0 0 18px rgba(245, 158, 11, 0.7), 0 10px 20px rgba(0,0,0,0.5);
+    z-index: 500;
+}
+
+.carta-actions {
+    position: absolute;
+    bottom: -72px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    z-index: 1000;
+    background: rgba(15, 23, 42, 0.97);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    padding: 7px;
+    min-width: 110px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.7);
+    animation: slide-down 0.18s ease;
+    pointer-events: all;
+}
+
+@keyframes slide-down {
+    from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.btn-action {
+    border: none;
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: 0.3px;
+}
+
+.btn-local {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: #fff;
+}
+.btn-local:hover:not(:disabled) {
+    background: linear-gradient(135deg, #60a5fa, #2563eb);
+    transform: scale(1.04);
+}
+
+.btn-visitante {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: #fff;
+}
+.btn-visitante:hover:not(:disabled) {
+    background: linear-gradient(135deg, #f87171, #dc2626);
+    transform: scale(1.04);
+}
+
+.btn-devolver {
+    background: linear-gradient(135deg, #6b7280, #374151);
+    color: #fff;
+}
+.btn-devolver:hover {
+    background: linear-gradient(135deg, #9ca3af, #4b5563);
+    transform: scale(1.04);
+}
+
+.btn-action:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Asegurar que la carta con botones no se corte */
+.posicion {
+    overflow: visible !important;
+}
+.mazo {
+    overflow-x: hidden;
+    overflow-y: auto;
+}

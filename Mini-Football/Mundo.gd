@@ -1,0 +1,387 @@
+extends Node2D
+
+@export var jugador_escena: PackedScene = preload("res://Players/jugador_base.tscn")
+
+@onready var pelota    = $Pelota
+@onready var porteria_i = $Porteria_i
+@onready var porteria_d = $Porteria_d
+@onready var camera    = $Camera2D
+
+var roles = ["POR", "DEF", "MED", "DEL"]
+
+const CAM_MIN_X = 500.0
+const CAM_MAX_X = 1600.0
+const CAM_MIN_Y = 150.0
+const CAM_MAX_Y = 750.0
+
+var kickoff_activo: bool = false
+var equipo_kickoff: String = "local"
+var timer_kickoff_ia: float = 0.0
+
+var saque_arco_activo: bool = false
+var equipo_saque_arco: String = ""
+var timer_ia_saque: float = 0.0
+
+var CENTRO_PELOTA: Vector2 = Vector2(1050, 525)  # Centro del campo por defecto
+
+var modo_juego: String = "6v6"
+
+# Limites dinámicos del campo
+var limite_min_x: float = 110.0
+var limite_max_x: float = 2010.0
+var limite_min_y: float = 25.0
+var limite_max_y: float = 1025.0
+
+
+func _ready():
+	_configurar_fisica_pelota()
+
+	var datos_web = obtener_datos_web()
+	if datos_web:
+		print("Datos recibidos de la web: ", datos_web)
+		if datos_web.has("modoJuego"):
+			modo_juego = datos_web.modoJuego
+		
+		instanciar_equipo(datos_web.local, "local")
+		instanciar_equipo(datos_web.visitante, "visitante")
+	else:
+		print("Modo local, equipo por defecto.")
+		var def_local = [
+			{"nombre": "J.Pick",     "rol": "POR"},
+			{"nombre": "S.Guard",    "rol": "DEF"},
+			{"nombre": "R.Paul",     "rol": "MED"},
+			{"nombre": "B.Viking",   "rol": "DEL"}
+		]
+		var def_visit = [
+			{"nombre": "B.Drago",    "rol": "POR"},
+			{"nombre": "P.Capitano", "rol": "DEF"},
+			{"nombre": "J.Gold",     "rol": "MED"},
+			{"nombre": "Ibracadabra", "rol": "DEL"}
+		]
+		instanciar_equipo(def_local, "local")
+		instanciar_equipo(def_visit, "visitante")
+
+	_ajustar_cancha_segun_modo()
+
+	# Iniciar el kickoff después de que todos los jugadores existan
+	call_deferred("iniciar_kickoff", "local")
+
+func _ajustar_cancha_segun_modo():
+	if modo_juego == "3v3":
+		limite_min_x = 450.0
+		limite_max_x = 1650.0
+		# Mover las porterías físicamente si existen en el nodo
+		if porteria_i: porteria_i.global_position.x = limite_min_x + 20
+		if porteria_d: porteria_d.global_position.x = limite_max_x - 20
+		
+		# Ajustar cámara límites
+		# CAM_MIN_X y CAM_MAX_X se manejan diferente si es necesario, pero clamp no falla si max < min
+	else:
+		limite_min_x = 110.0
+		limite_max_x = 2010.0
+		if porteria_i: porteria_i.global_position.x = limite_min_x + 20
+		if porteria_d: porteria_d.global_position.x = limite_max_x - 20
+
+
+# ==========================================
+# KICKOFF
+# ==========================================
+func iniciar_kickoff(equipo_que_saca: String = "local"):
+	kickoff_activo = true
+	equipo_kickoff = equipo_que_saca
+	timer_kickoff_ia = 0.0
+
+	# Congelar pelota en el centro
+	pelota.global_position = CENTRO_PELOTA
+	pelota.linear_velocity  = Vector2.ZERO
+	pelota.angular_velocity = 0.0
+	pelota.freeze = true
+	if has_node("AvisoSaque"):
+		var text = "SAQUE DE CENTRO: " + equipo_que_saca.to_upper()
+		if equipo_que_saca == "local":
+			text += "\nPresiona ESPACIO o C para patear"
+		$AvisoSaque.text = text
+		$AvisoSaque.visible = true
+
+	# Ordenar a todos los jugadores que vayan a su posición inicial
+	for p in get_tree().get_nodes_in_group("local"):
+		p.activar_kickoff()
+	for p in get_tree().get_nodes_in_group("visitante"):
+		p.activar_kickoff()
+
+func _process(delta: float):
+	# --- CAMBIO DE JUGADOR (Q) ---
+	if Input.is_key_pressed(KEY_Q) or Input.is_physical_key_pressed(KEY_Q):
+		# Usamos un cooldown interno o solo just_pressed
+		pass # Lo manejamos mejor en _unhandled_input para evitar ráfagas
+		
+	# --- KICKOFF COUNTDOWN ---
+
+	if kickoff_activo:
+		if equipo_kickoff == "local":
+			if Input.is_action_just_pressed("patear"):
+				_finalizar_kickoff()
+		else:
+			timer_kickoff_ia += delta
+			if timer_kickoff_ia >= 1.5:
+				_finalizar_kickoff()
+	elif saque_arco_activo:
+		if equipo_saque_arco == "local":
+			if Input.is_action_just_pressed("patear"):
+				_finalizar_saque_arco()
+		else:
+			timer_ia_saque += delta
+			if timer_ia_saque >= 1.5:
+				_finalizar_saque_arco()
+
+	# --- CÁMARA ---
+	if camera and pelota:
+		var target_x = clamp(pelota.global_position.x, CAM_MIN_X, CAM_MAX_X)
+		var target_y = clamp(pelota.global_position.y, CAM_MIN_Y, CAM_MAX_Y)
+		camera.global_position.x = lerp(camera.global_position.x, target_x, delta * 4.0)
+		camera.global_position.y = lerp(camera.global_position.y, target_y, delta * 3.0)
+
+func _finalizar_kickoff():
+	kickoff_activo = false
+	pelota.freeze  = false
+	if has_node("AvisoSaque"):
+		$AvisoSaque.visible = false
+
+	# Buscar compañero local (IA) para pasarle
+	var teammate_group = equipo_kickoff
+	var teammates = get_tree().get_nodes_in_group(teammate_group)
+	var target = null
+	var min_dist = INF
+	for p in teammates:
+		if p.es_humano: continue
+		var d = p.global_position.distance_to(pelota.global_position)
+		if d < min_dist:
+			min_dist = d
+			target = p
+	
+	var dir = Vector2(1, 0) if teammate_group == "local" else Vector2(-1, 0)
+	if target:
+		dir = (target.global_position - pelota.global_position).normalized()
+	
+	pelota.apply_central_impulse(dir * 500.0)
+
+	# Liberar a todos los jugadores
+	for p in get_tree().get_nodes_in_group("local"):
+		p.desactivar_kickoff()
+	for p in get_tree().get_nodes_in_group("visitante"):
+		p.desactivar_kickoff()
+
+func iniciar_saque_arco(equipo: String):
+	saque_arco_activo = true
+	equipo_saque_arco = equipo
+	pelota.freeze = true
+	timer_ia_saque = 0.0
+	
+	var pos_saque = Vector2.ZERO
+	if equipo == "local":
+		pos_saque = Vector2(250, 500)
+	else:
+		pos_saque = Vector2(1850, 500)
+	
+	pelota.global_position = pos_saque
+	pelota.linear_velocity = Vector2.ZERO
+	
+	if has_node("AvisoSaque"):
+		$AvisoSaque.text = "SAQUE DE ARCO: " + equipo.to_upper() + "\nPresiona C o ESPACIO"
+		$AvisoSaque.visible = true
+	
+	for p in get_tree().get_nodes_in_group("local"):
+		p.activar_saque_arco(equipo)
+	for p in get_tree().get_nodes_in_group("visitante"):
+		p.activar_saque_arco(equipo)
+
+func _finalizar_saque_arco():
+	saque_arco_activo = false
+	pelota.freeze = false
+	if has_node("AvisoSaque"):
+		$AvisoSaque.visible = false
+	
+	# El portero o jugador más cercano patea
+	var p_pateador = null
+	var min_dist = INF
+	for p in get_tree().get_nodes_in_group(equipo_saque_arco):
+		var d = p.global_position.distance_to(pelota.global_position)
+		if d < min_dist:
+			min_dist = d
+			p_pateador = p
+	
+	if p_pateador:
+		var target = null
+		var min_dist_t = INF
+		for p in get_tree().get_nodes_in_group(equipo_saque_arco):
+			if p != p_pateador:
+				var d = p.global_position.distance_to(pelota.global_position)
+				if d < min_dist_t:
+					min_dist_t = d
+					target = p
+		
+		var dir = Vector2(1, 0) if equipo_saque_arco == "local" else Vector2(-1, 0)
+		if target:
+			dir = (target.global_position - pelota.global_position).normalized()
+		
+		pelota.apply_central_impulse(dir * 600.0)
+
+	for p in get_tree().get_nodes_in_group("local"):
+		p.desactivar_saque_arco()
+	for p in get_tree().get_nodes_in_group("visitante"):
+		p.desactivar_saque_arco()
+		
+func _unhandled_input(event):
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_Q:
+			_cambiar_jugador_activo()
+
+func _cambiar_jugador_activo():
+	var local_players = get_tree().get_nodes_in_group("local")
+	var mas_cercano = null
+	var min_dist = INF
+	
+	for p in local_players:
+		var dist = p.global_position.distance_to(pelota.global_position)
+		if dist < min_dist:
+			min_dist = dist
+			mas_cercano = p
+			
+	if mas_cercano:
+		for p in local_players:
+			p.es_humano = (p == mas_cercano)
+
+
+# ==========================================
+# FÍSICA DE PELOTA — ESTILO HAXBALL
+# ==========================================
+func _configurar_fisica_pelota():
+	if not pelota: return
+	var mat = PhysicsMaterial.new()
+	mat.bounce   = 0.35
+	mat.friction = 0.1
+	pelota.physics_material_override = mat
+	pelota.mass         = 1.1 # Le bajamos la masa para que no sea tan pesada
+	pelota.linear_damp  = 3.8 # Le bajamos el damp para que fluya mejor
+
+	pelota.angular_damp = 2.0
+
+func _physics_process(_delta):
+	if not pelota or pelota.freeze: return
+	
+	var pos = pelota.global_position
+	var vel = pelota.linear_velocity
+	
+	# Límites del campo (ajustados a mundo.tscn)
+	var choco = false
+	if pos.x < limite_min_x:
+		# Solo saque si no es gol (Y fuera de rango de portería)
+		if pos.y < 400 or pos.y > 600:
+			iniciar_saque_arco("local")
+			return
+		else:
+			pos.x = limite_min_x
+			vel.x = abs(vel.x) * 0.8
+			choco = true
+	elif pos.x > limite_max_x:
+		if pos.y < 400 or pos.y > 600:
+			iniciar_saque_arco("visitante")
+			return
+		else:
+			pos.x = limite_max_x
+			vel.x = -abs(vel.x) * 0.8
+			choco = true
+		
+	if pos.y < limite_min_y:
+		pos.y = limite_min_y
+		vel.y = abs(vel.y) * 0.8
+		vel.x += (randf() - 0.5) * 350.0
+		choco = true
+	elif pos.y > limite_max_y:
+		pos.y = limite_max_y
+		vel.y = -abs(vel.y) * 0.8
+		vel.x += (randf() - 0.5) * 350.0
+		choco = true
+		
+	if choco:
+		pelota.global_position = pos
+		pelota.linear_velocity = vel
+
+# ==========================================
+func obtener_datos_web():
+	if OS.has_feature("web"):
+		var json_string = JavaScriptBridge.eval("window.localStorage.getItem('miniFootballMatchData');")
+		if json_string and json_string != "null":
+			var json = JSON.new()
+			if json.parse(json_string) == OK:
+				return json.get_data()
+	return null
+
+func instanciar_equipo(datos_jugadores: Array, equipo: String):
+	var ya_hay_humano = false
+	var count_rol  = {"POR": 0, "DEF": 0, "MED": 0, "DEL": 0}
+	var current_rol = {"POR": 0, "DEF": 0, "MED": 0, "DEL": 0}
+
+	for j in datos_jugadores:
+		var r = j.rol if typeof(j) == TYPE_DICTIONARY else roles[datos_jugadores.find(j) % 4]
+		if count_rol.has(r):
+			count_rol[r] += 1
+
+	for i in range(min(datos_jugadores.size(), 6)):
+		var data           = datos_jugadores[i]
+		var nombre_jugador = data.nombre if typeof(data) == TYPE_DICTIONARY else data
+		var rol_jugador    = data.rol    if typeof(data) == TYPE_DICTIONARY else roles[i % 4]
+
+		var inst = jugador_escena.instantiate()
+
+		var x_pos = 150
+		match rol_jugador:
+			"POR": x_pos = 150
+			"DEF": x_pos = 420
+			"MED": x_pos = 690
+			"DEL": x_pos = 1010  # Acercado al centro para saque
+
+		# Ajuste dinámico de posiciones iniciales según el modo de juego
+		if modo_juego == "3v3":
+			match rol_jugador:
+				"DEF": x_pos = 600
+				"DEL": x_pos = 950
+
+		if equipo == "visitante":
+			if rol_jugador == "DEL":
+				x_pos = limite_max_x - (limite_max_x / 2 - 150) # Alejado del centro
+			else:
+				x_pos = limite_max_x - x_pos
+
+
+		var total_en_linea = max(1, count_rol[rol_jugador])
+		var idx_en_linea   = current_rol[rol_jugador]
+		var espacio_y      = 900.0 / float(total_en_linea)
+		var y_pos          = 75.0 + (espacio_y / 2.0) + (idx_en_linea * espacio_y)
+		current_rol[rol_jugador] += 1
+
+		inst.global_position = Vector2(x_pos, y_pos)
+		inst.equipo = equipo
+		inst.rol    = rol_jugador
+
+		var ruta_sprite = "res://SpriteSheets/" + nombre_jugador + ".png"
+		if ResourceLoader.exists(ruta_sprite):
+			inst.get_node("Sprite2D").texture  = load(ruta_sprite)
+			inst.get_node("Sprite2D").modulate = Color(1, 1, 1)
+
+		inst.aplicar_estadisticas(nombre_jugador, rol_jugador)
+		inst.pelota = pelota
+
+		if equipo == "local":
+			inst.porteria_propia  = porteria_i
+			inst.porteria_enemiga = porteria_d
+			if not ya_hay_humano and (rol_jugador == "DEL" or rol_jugador == "MED"):
+				inst.es_humano = true
+				ya_hay_humano  = true
+		else:
+			inst.porteria_propia  = porteria_d
+			inst.porteria_enemiga = porteria_i
+			inst.es_humano        = false
+
+		add_child(inst)
+		print("Spawneado ", nombre_jugador, " (", rol_jugador, ") - ", equipo)
