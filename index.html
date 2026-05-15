@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Football Draft</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Cartas/style.css" />
+</head>
+
+<body>
+    <div class="background-effects">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+    </div>
+
+    <header>
+        <h1>ULTIMATE <span>DRAFT</span></h1>
+        <p id="subtitulo-draft">Arma tu equipo 6 vs 6 para el partido</p>
+
+        <div class="formation-controls" style="margin-bottom: 15px;">
+            <div class="team-selector">
+                <h3>FORMATO</h3>
+                <div class="button-group" id="group-formato">
+                    <button class="btn-formation active" onclick="cambiarFormato('6v6', this)">6 VS 6</button>
+                    <button class="btn-formation" onclick="cambiarFormato('3v3', this)">3 VS 3</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="formation-controls">
+            <div class="team-selector" id="selector-local">
+                <h3>TU FORMACIÓN</h3>
+                <div class="button-group" id="group-local">
+                    <button class="btn-formation active"
+                        onclick="cambiarFormacionUI('local', '2-1-2', this)">2-1-2</button>
+                    <button class="btn-formation" onclick="cambiarFormacionUI('local', '2-2-1', this)">2-2-1</button>
+                    <button class="btn-formation" onclick="cambiarFormacionUI('local', '1-2-2', this)">1-2-2</button>
+                </div>
+            </div>
+
+            <div class="main-action">
+                <div style="display: flex; gap: 10px; justify-content: center; align-items: center;">
+                    <button id="btn-jugar" class="btn-premium" onclick="iniciarPartido()">
+                        <span class="btn-text">JUGAR PARTIDO</span>
+                        <span class="btn-icon">▶</span>
+                    </button>
+                    <button id="btn-random" class="btn-random" onclick="completarAlAzar()">
+                        <span class="btn-text">COMPLETAR AL AZAR</span>
+                        <span class="btn-icon">🎲</span>
+                    </button>
+                </div>
+                <div
+                    style="color: #93c5fd; font-size: 0.85rem; margin-top: 10px; font-weight: 500; text-align: center;">
+                    🎮 Controlarás al jugador con la aurora blanca. Pulsa <b>Q</b> en el juego para cambiar.
+                </div>
+            </div>
+
+            <div class="team-selector" id="selector-visitante">
+                <h3>FORMACIÓN RIVAL</h3>
+                <div class="button-group" id="group-visitante">
+                    <button class="btn-formation active"
+                        onclick="cambiarFormacionUI('visitante', '2-1-2', this)">2-1-2</button>
+                    <button class="btn-formation"
+                        onclick="cambiarFormacionUI('visitante', '2-2-1', this)">2-2-1</button>
+                    <button class="btn-formation"
+                        onclick="cambiarFormacionUI('visitante', '1-2-2', this)">1-2-2</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Selectores ocultos para compatibilidad con la lógica anterior -->
+        <select id="select-formacion-local" style="display:none;">
+            <option value="2-1-2">2-1-2</option>
+            <option value="2-2-1">2-2-1</option>
+            <option value="1-2-2">1-2-2</option>
+        </select>
+        <select id="select-formacion-visitante" style="display:none;">
+            <option value="2-1-2">2-1-2</option>
+            <option value="2-2-1">2-2-1</option>
+            <option value="1-2-2">1-2-2</option>
+        </select>
+    </header>
+
+    <main class="container">
+        <!-- Panel Superior: Campo de Juego -->
+        <div class="campo-wrapper">
+            <div id="campo-futbol">
+                <!-- Equipo Local (Izquierda) -->
+                <div class="zona-equipo local f-2-1-2" id="zona-local">
+                    <h3 class="equipo-title">TU EQUIPO</h3>
+                    <div class="posicion pos-1" data-slot-rol="POR" ondragover="allowDrop(event)" ondrop="drop(event)">
+                        <span class="etiqueta">POR</span></div>
+                    <div class="posicion pos-2" data-slot-rol="DEF" ondragover="allowDrop(event)" ondrop="drop(event)">
+                        <span class="etiqueta">DEF</span></div>
+                    <div class="posicion pos-3" data-slot-rol="DEF" ondragover="allowDrop(event)" ondrop="drop(event)">
+                        <span class="etiqueta">DEF</span></div>
+                    <div class="posicion pos-4" data-slot-rol="MED" ondragover="allowDrop(event)" ondrop="drop(event)">
+                        <span class="etiqueta">MED</span></div>
+                    <div class="posicion pos-5" data-slot-rol="DEL" ondragover="allowDrop(event)" ondrop="drop(event)">
+                        <span class="etiqueta">DEL</span></div>
+                    <div class="posicion pos-6" data-slot-rol="DEL" ondragover="allowDrop(event)" ondrop="drop(event)">
+                        <span class="etiqueta">DEL</span></div>
+                </div>
+
+                <!-- Línea central -->
+                <div class="linea-central">
+                    <div class="circulo-central"></div>
+                </div>
+
+                <!-- Equipo Visitante (Derecha) -->
+                <div class="zona-equipo visitante f-2-1-2" id="zona-visitante">
+                    <h3 class="equipo-title">RIVAL</h3>
+                    <div class="posicion pos-1" data-slot-rol="POR" ondragover="allowDrop(event)" ondrop="drop(event)">
+                        <span class="etiqueta">POR</span></div>
+                    <div class="posicion pos-2" data-slot-rol="DEF" ondragover="allowDrop(event)" ondrop="drop(event)">
+                        <span class="etiqueta">DEF</span></div>
+                    <div class="posicion pos-3" data-slot-rol="DEF" ondragover="allowDrop(event)" ondrop="drop(event)">
+                        <span class="etiqueta">DEF</span></div>
+                    <div class="posicion pos-4" data-slot-rol="MED" ondragover="allowDrop(event)" ondrop="drop(event)">
+                        <span class="etiqueta">MED</span></div>
+                    <div class="posicion pos-5" data-slot-rol="DEL" ondragover="allowDrop(event)" ondrop="drop(event)">
+                        <span class="etiqueta">DEL</span></div>
+                    <div class="posicion pos-6" data-slot-rol="DEL" ondragover="allowDrop(event)" ondrop="drop(event)">
+                        <span class="etiqueta">DEL</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Inferior: Mazo de Cartas -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>Tus Cartas</h2>
+                <div class="filter-bar">
+                    <span class="badge">Todos</span>
+                </div>
+            </div>
+
+            <div class="mazo" id="mazo" ondragover="allowDrop(event)" ondrop="drop(event)">
+                <!-- DELANTEROS -->
+                <div class="carta" id="p8" data-player="Ibracadabra" data-rol="DEL" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">DC</div>
+                    <img src="Cartas/imagenes/Ibracadabra.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p10" data-player="B.Viking" data-rol="DEL" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">DC</div>
+                    <img src="Cartas/imagenes/B.Viking.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p3" data-player="S.Shin" data-rol="DEL" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">EI</div>
+                    <img src="Cartas/imagenes/S.Shin.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p1" data-player="J.Gold" data-rol="DEL" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">EI</div>
+                    <img src="Cartas/imagenes/J.Gold.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p17" data-player="R.Vole" data-rol="DEL" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">DC</div>
+                    <img src="Cartas/imagenes/R.Vole.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p18" data-player="G.Mill" data-rol="DEL" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">DC</div>
+                    <img src="Cartas/imagenes/G.Mill.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p23" data-player="A.Prince" data-rol="DEL" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">DC</div>
+                    <img src="Cartas/imagenes/A.Prince.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+
+                <!-- MEDIOS -->
+                <div class="carta" id="p2" data-player="B.Spice" data-rol="MED" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">MC</div>
+                    <img src="Cartas/imagenes/B.Spice.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p7" data-player="M.Norse" data-rol="MED" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">MC</div>
+                    <img src="Cartas/imagenes/M.Norse.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p11" data-player="R.Ninja" data-rol="MED" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">MC</div>
+                    <img src="Cartas/imagenes/R.Ninja.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p12" data-player="D.Space" data-rol="MED" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">MC</div>
+                    <img src="Cartas/imagenes/D.Space.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p13" data-player="L.Berg" data-rol="MED" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">MC</div>
+                    <img src="Cartas/imagenes/L.Berg.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p14" data-player="D.Armando" data-rol="MED" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">MCO</div>
+                    <img src="Cartas/imagenes/D.Armando.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p16" data-player="R.Paul" data-rol="MED" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">MC</div>
+                    <img src="Cartas/imagenes/R.Paul.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p22" data-player="A.Gunnar" data-rol="MED" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">MCD</div>
+                    <img src="Cartas/imagenes/A.Gunnar.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+
+                <!-- DEFENSAS -->
+                <div class="carta" id="p4" data-player="P.Capitano" data-rol="DEF" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">CI</div>
+                    <img src="Cartas/imagenes/P-Capitano.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p5" data-player="J.Rod" data-rol="DEF" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">CD</div>
+                    <img src="Cartas/imagenes/J-Rod.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p6" data-player="K.Trip" data-rol="DEF" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">LD</div>
+                    <img src="Cartas/imagenes/K.Trip.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p9" data-player="F.Kaiser" data-rol="DEF" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">CD</div>
+                    <img src="Cartas/imagenes/F.Kaiser.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p15" data-player="R.Dragon" data-rol="DEF" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">DFC</div>
+                    <img src="Cartas/imagenes/R.Dragon.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p19" data-player="S.Guard" data-rol="DEF" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">DFC</div>
+                    <img src="Cartas/imagenes/S.Guard.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p24" data-player="I.Bat" data-rol="DEF" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">LD</div>
+                    <img src="Cartas/imagenes/I.Bat.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p25" data-player="D.Cala" data-rol="DEF" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">LD</div>
+                    <img src="Cartas/imagenes/D.Cala.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p26" data-player="G.Monty" data-rol="DEF" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">LD</div>
+                    <img src="Cartas/imagenes/G.Monty.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p27" data-player="N.Gude" data-rol="DEF" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">DFC</div>
+                    <img src="Cartas/imagenes/N.Gude.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+
+                <!-- ARQUEROS -->
+                <div class="carta" id="p20" data-player="B.Drago" data-rol="POR" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">POR</div>
+                    <img src="Cartas/imagenes/B.Drago.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+                <div class="carta" id="p21" data-player="J.Pick" data-rol="POR" draggable="true"
+                    ondragstart="drag(event)">
+                    <div class="posicion-jugador">POR</div>
+                    <img src="Cartas/imagenes/J.Pick.png" class="foto-jugador"
+                        onerror="this.parentElement.classList.add('no-image')">
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        // ---- Drag & Drop ----
+        function allowDrop(ev) { ev.preventDefault(); }
+
+        function drag(ev) {
+            cerrarPanel();
+            ev.dataTransfer.setData("text", ev.currentTarget.id);
+            ev.currentTarget.classList.add('is-dragging');
+        }
+        document.addEventListener('dragenter', ev => {
+            const t = ev.target.closest('.posicion') || ev.target.closest('.mazo');
+            if (t) t.classList.add('drag-over');
+        });
+        document.addEventListener('dragleave', ev => {
+            const t = ev.target.closest('.posicion') || ev.target.closest('.mazo');
+            if (t) t.classList.remove('drag-over');
+        });
+        document.addEventListener('dragend', ev => {
+            ev.target.classList.remove('is-dragging');
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+        });
+        function drop(ev) {
+            ev.preventDefault();
+            const carta = document.getElementById(ev.dataTransfer.getData("text"));
+            if (!carta) return;
+            const dropTarget = ev.target.closest('.posicion') || ev.target.closest('.mazo');
+            if (!dropTarget) return;
+            document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+            if (dropTarget.classList.contains('posicion')) {
+                const existing = dropTarget.querySelector('.carta');
+                if (existing && existing !== carta) document.getElementById('mazo').appendChild(existing);
+                dropTarget.appendChild(carta);
+            } else {
+                dropTarget.appendChild(carta);
+            }
+        }
+
+        // ---- Formaciones ----
+        function cambiarFormacionUI(equipo, formacion, btn) {
+            btn.parentElement.querySelectorAll('.btn-formation').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('select-formacion-' + equipo).value = formacion;
+            const zona = document.getElementById('zona-' + equipo);
+            zona.classList.remove('f-2-1-2', 'f-2-2-1', 'f-1-2-2');
+            zona.classList.add('f-' + formacion);
+            const rolesMap = {
+                '2-1-2': ['POR', 'DEF', 'DEF', 'MED', 'DEL', 'DEL'],
+                '2-2-1': ['POR', 'DEF', 'DEF', 'MED', 'MED', 'DEL'],
+                '1-2-2': ['POR', 'DEF', 'MED', 'MED', 'DEL', 'DEL']
+            };
+            if (formatoActual === '6v6') {
+                zona.querySelectorAll('.posicion').forEach((slot, i) => {
+                    slot.dataset.slotRol = rolesMap[formacion][i];
+                    const etq = slot.querySelector('.etiqueta');
+                    if (etq) etq.innerText = rolesMap[formacion][i];
+                });
+            }
+        }
+
+        let formatoActual = '6v6';
+        function cambiarFormato(formato, btn) {
+            btn.parentElement.querySelectorAll('.btn-formation').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            formatoActual = formato;
+
+            document.getElementById('subtitulo-draft').innerText = formato === '3v3' ? 'Arma tu equipo 3 vs 3 (1 DEF, 2 DEL)' : 'Arma tu equipo 6 vs 6 para el partido';
+
+            const zLocal = document.getElementById('zona-local');
+            const zVisitante = document.getElementById('zona-visitante');
+
+            if (formato === '3v3') {
+                document.getElementById('selector-local').style.display = 'none';
+                document.getElementById('selector-visitante').style.display = 'none';
+
+                [zLocal, zVisitante].forEach(zona => {
+                    // Mover las cartas de vuelta al mazo si están en las posiciones 4, 5, 6
+                    [4, 5, 6].forEach(i => {
+                        const carta = zona.querySelector(`.pos-${i} .carta`);
+                        if (carta) document.getElementById('mazo').appendChild(carta);
+                        zona.querySelector(`.pos-${i}`).style.display = 'none';
+                    });
+
+                    // Configurar 3v3: 1 DEF, 2 DEL
+                    const roles3v3 = ['DEF', 'DEL', 'DEL'];
+                    [1, 2, 3].forEach((pos, idx) => {
+                        const slot = zona.querySelector(`.pos-${pos}`);
+                        slot.dataset.slotRol = roles3v3[idx];
+                        const etq = slot.querySelector('.etiqueta');
+                        if (etq) etq.innerText = roles3v3[idx];
+
+                        // Devolver la carta si no coincide con el nuevo rol
+                        const carta = slot.querySelector('.carta');
+                        if (carta && carta.dataset.rol !== roles3v3[idx] && roles3v3[idx] !== 'CUALQUIERA') {
+                            document.getElementById('mazo').appendChild(carta);
+                        }
+                    });
+                });
+            } else {
+                document.getElementById('selector-local').style.display = 'block';
+                document.getElementById('selector-visitante').style.display = 'block';
+
+                [zLocal, zVisitante].forEach(zona => {
+                    [4, 5, 6].forEach(i => {
+                        zona.querySelector(`.pos-${i}`).style.display = 'flex';
+                    });
+                });
+
+                // Forzar el redibujado de las formaciones de 6v6 actuales
+                const btnLocal = document.querySelector('#group-local .active');
+                if (btnLocal) btnLocal.click();
+                const btnVisit = document.querySelector('#group-visitante .active');
+                if (btnVisit) btnVisit.click();
+            }
+        }
+
+        // ---- Panel flotante de acciones ----
+        // El panel se inserta en document.body (NO dentro de la carta),
+        // para evitar ser recortado por overflow:hidden de los contenedores.
+        let cartaActiva = null;
+        let panelActivo = null;
+
+        function cerrarPanel() {
+            if (panelActivo) { panelActivo.remove(); panelActivo = null; }
+            if (cartaActiva) { cartaActiva.classList.remove('selected'); cartaActiva = null; }
+        }
+
+        function contarEnZona(id) {
+            return document.getElementById(id).querySelectorAll('.posicion .carta').length;
+        }
+        function primerSlotLibre(zonaId, rol) {
+            const slots = [...document.getElementById(zonaId).querySelectorAll('.posicion')];
+            return slots.find(s => s.dataset.slotRol === rol && !s.querySelector('.carta'))
+                || slots.find(s => !s.querySelector('.carta')) || null;
+        }
+        function asignarCarta(zonaId) {
+            const carta = cartaActiva;
+            const slot = primerSlotLibre(zonaId, carta.dataset.rol);
+            if (!slot) return;
+            cerrarPanel();
+            slot.appendChild(carta);
+        }
+        function devolverCarta() {
+            const carta = cartaActiva;
+            cerrarPanel();
+            document.getElementById('mazo').appendChild(carta);
+        }
+
+        function abrirPanel(carta) {
+            cerrarPanel();
+            carta.classList.add('selected');
+            cartaActiva = carta;
+
+            const enMazo = !!carta.closest('#mazo');
+            const enFormacion = !enMazo && !!carta.closest('.posicion');
+
+            const panel = document.createElement('div');
+            panel.id = 'panel-acciones';
+
+            if (enMazo) {
+                const totL = contarEnZona('zona-local');
+                const totV = contarEnZona('zona-visitante');
+                const slL = primerSlotLibre('zona-local', carta.dataset.rol);
+                const slV = primerSlotLibre('zona-visitante', carta.dataset.rol);
+
+                const reqJugadores = formatoActual === '3v3' ? 3 : 6;
+                const bL = document.createElement('button');
+                bL.className = 'btn-action btn-local';
+                bL.innerHTML = '🔵 Tu Equipo';
+                bL.disabled = totL >= reqJugadores || !slL;
+                bL.onclick = e => { e.stopPropagation(); asignarCarta('zona-local'); };
+
+                const bV = document.createElement('button');
+                bV.className = 'btn-action btn-visitante';
+                bV.innerHTML = '🔴 Rival';
+                bV.disabled = totV >= reqJugadores || !slV;
+                bV.onclick = e => { e.stopPropagation(); asignarCarta('zona-visitante'); };
+
+                panel.appendChild(bL);
+                panel.appendChild(bV);
+
+            } else if (enFormacion) {
+                const bD = document.createElement('button');
+                bD.className = 'btn-action btn-devolver';
+                bD.innerHTML = '↩ Devolver';
+                bD.onclick = e => { e.stopPropagation(); devolverCarta(); };
+                panel.appendChild(bD);
+            }
+
+            document.body.appendChild(panel);
+            panelActivo = panel;
+            posicionarPanel(carta, panel);
+        }
+
+        function posicionarPanel(carta, panel) {
+            const r = carta.getBoundingClientRect();
+            panel.style.position = 'fixed';
+
+            let left = r.left + r.width / 2 - 65;
+            // Detectar si hay espacio abajo (necesitamos ~80px para los botones)
+            const espacioAbajo = window.innerHeight - r.bottom;
+            let top;
+
+            if (espacioAbajo < 90) {
+                // No hay espacio abajo, mostrar ARRIBA de la carta
+                top = r.top - panel.offsetHeight - 10;
+                // Si el panel no tiene height aún (primera vez), estimamos 80px
+                if (isNaN(top)) top = r.top - 90;
+            } else {
+                // Mostrar abajo normalmente
+                top = r.bottom + 10;
+            }
+
+            if (left + 140 > window.innerWidth - 10) left = window.innerWidth - 145;
+            if (left < 5) left = 5;
+            if (top < 5) top = 5;
+
+            panel.style.left = left + 'px';
+            panel.style.top = top + 'px';
+        }
+
+        document.addEventListener('click', e => {
+            if (e.target.closest('#panel-acciones')) return;
+            const c = e.target.closest('.carta');
+            c ? (c === cartaActiva ? cerrarPanel() : abrirPanel(c)) : cerrarPanel();
+        });
+
+        window.addEventListener('scroll', () => {
+            if (panelActivo && cartaActiva) posicionarPanel(cartaActiva, panelActivo);
+        }, true);
+
+        // ---- Iniciar Partido ----
+        function completarAlAzar() {
+            cerrarPanel();
+            const mazo = document.getElementById('mazo');
+            const zonas = ['zona-local', 'zona-visitante'];
+
+            zonas.forEach(zonaId => {
+                const maxSlots = formatoActual === '3v3' ? 3 : 6;
+                const allSlots = [...document.getElementById(zonaId).querySelectorAll('.posicion')];
+                const slots = allSlots.slice(0, maxSlots);
+
+                slots.forEach(slot => {
+                    if (!slot.querySelector('.carta')) {
+                        const rol = slot.dataset.slotRol;
+                        // Intentar buscar carta del mismo rol primero
+                        let cartas = [...mazo.querySelectorAll(`.carta[data-rol="${rol}"]`)];
+                        if (cartas.length === 0) {
+                            // Si no hay de ese rol, cualquier carta
+                            cartas = [...mazo.querySelectorAll('.carta')];
+                        }
+
+                        if (cartas.length > 0) {
+                            const randomIdx = Math.floor(Math.random() * cartas.length);
+                            const carta = cartas[randomIdx];
+                            slot.appendChild(carta);
+                        }
+                    }
+                });
+            });
+        }
+
+        function iniciarPartido() {
+            const tL = [], tV = [];
+            document.getElementById('zona-local').querySelectorAll('.posicion').forEach(p => {
+                const el = p.querySelector('.carta');
+                if (el) tL.push({ nombre: el.dataset.player, rol: p.dataset.slotRol });
+            });
+            document.getElementById('zona-visitante').querySelectorAll('.posicion').forEach(p => {
+                const el = p.querySelector('.carta');
+                if (el) tV.push({ nombre: el.dataset.player, rol: p.dataset.slotRol });
+            });
+            const reqJugadores = formatoActual === '3v3' ? 3 : 6;
+            if (tL.length < reqJugadores || tV.length < reqJugadores) {
+                alert(`¡Debes colocar exactamente ${reqJugadores} jugadores en cada equipo antes de jugar!`);
+                return;
+            }
+            const matchData = {
+                local: tL, visitante: tV,
+                modoJuego: formatoActual,
+                formacionLocal: document.getElementById('select-formacion-local').value,
+                formacionVisitante: document.getElementById('select-formacion-visitante').value
+            };
+            localStorage.setItem('miniFootballMatchData', JSON.stringify(matchData));
+            window.location.href = "Mini-Football/Exports/web/Mini-Football.html";
+        }
+
+        // ---- Inicialización de fallback de cartas ----
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.carta').forEach(carta => {
+                // Inyectar nombre si no existe
+                if (!carta.querySelector('.nombre-jugador-fallback')) {
+                    const nombre = document.createElement('div');
+                    nombre.className = 'nombre-jugador-fallback';
+                    nombre.innerText = carta.dataset.player || 'JUGADOR';
+                    carta.appendChild(nombre);
+                }
+
+                // Verificar si la imagen ya falló (por si acaso)
+                const img = carta.querySelector('.foto-jugador');
+                if (img && img.naturalWidth === 0 && img.complete) {
+                    carta.classList.add('no-image');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
