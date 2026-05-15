@@ -19,7 +19,8 @@ Puedes jugar la versión estable directamente en tu navegador aquí:
 ### 🎮 Gameplay (Godot Engine)
 *   **Físicas Estilo Haxball**: Un sistema de rebotes y fricción optimizado para que el juego sea fluido y competitivo.
 *   **Control Dinámico**: Controlas al jugador marcado con una **aurora blanca**.
-*   **Cambio de Jugador Inteligente**: Pulsa la tecla **R** para cambiar instantáneamente al jugador más cercano a la pelota.
+*   **Cambio de Jugador Inteligente**: Pulsa la tecla **Q** para cambiar instantáneamente al jugador más cercano a la pelota.
+*   **Próximamente**: ¡Se incluirán más cartas de jugadores para ampliar tu colección y opciones de draft!
 *   **IA Competitiva**: Tus compañeros y rivales se mueven tácticamente según sus roles (POR, DEF, MED, DEL).
 
 ---
@@ -27,7 +28,7 @@ Puedes jugar la versión estable directamente en tu navegador aquí:
 ## 🛠️ Controles del Juego
 *   **Flechas / WASD**: Mover al jugador.
 *   **Barra Espaciadora / C**: Patear la pelota (con buffer de disparo).
-*   **Tecla R**: Cambiar de jugador activo.
+*   **Tecla Q**: Cambiar de jugador activo.
 
 ---
 
