@@ -6,6 +6,7 @@ extends Node2D
 @onready var porteria_i = $Porteria_i
 @onready var porteria_d = $Porteria_d
 @onready var camera    = $Camera2D
+@onready var fondo     = $TextureRect
 
 var roles = ["POR", "DEF", "MED", "DEL"]
 
@@ -100,20 +101,45 @@ func _configurar_inputs():
 			InputMap.action_add_event(accion, evento)
 
 func _ajustar_cancha_segun_modo():
-	if modo_juego == "3v3" or modo_juego == "1v1":
+	if modo_juego == "1v1":
+		# Campo muy reducido para 1v1
+		limite_min_x = 550.0
+		limite_max_x = 1550.0
+		limite_min_y = 200.0
+		limite_max_y = 850.0
+		if camera: camera.zoom = Vector2(1.3, 1.3)
+	elif modo_juego == "3v3":
+		# Campo intermedio para 3v3
 		limite_min_x = 450.0
 		limite_max_x = 1650.0
-		# Mover las porterías físicamente si existen en el nodo
-		if porteria_i: porteria_i.global_position.x = limite_min_x + 20
-		if porteria_d: porteria_d.global_position.x = limite_max_x - 20
-		
-		# Ajustar cámara límites
-		# CAM_MIN_X y CAM_MAX_X se manejan diferente si es necesario, pero clamp no falla si max < min
+		limite_min_y = 125.0
+		limite_max_y = 925.0
+		if camera: camera.zoom = Vector2(1.1, 1.1)
 	else:
+		# Campo completo 6v6
 		limite_min_x = 110.0
 		limite_max_x = 2010.0
-		if porteria_i: porteria_i.global_position.x = limite_min_x + 20
-		if porteria_d: porteria_d.global_position.x = limite_max_x - 20
+		limite_min_y = 25.0
+		limite_max_y = 1025.0
+		if camera: camera.zoom = Vector2(0.85, 0.85)
+	
+	# Mover porterías al borde del campo
+	if porteria_i: porteria_i.global_position.x = limite_min_x + 20
+	if porteria_d: porteria_d.global_position.x = limite_max_x - 20
+	
+	# Ajustar imagen de fondo para que coincida con el campo
+	if fondo:
+		fondo.offset_left   = limite_min_x - 100
+		fondo.offset_right  = limite_max_x + 100
+		fondo.offset_top    = limite_min_y - 75
+		fondo.offset_bottom = limite_max_y + 75
+	
+	# Centrar cámara en el campo
+	if camera:
+		camera.global_position = Vector2((limite_min_x + limite_max_x) / 2.0, (limite_min_y + limite_max_y) / 2.0)
+	
+	# Actualizar centro de pelota para kickoffs
+	CENTRO_PELOTA = Vector2((limite_min_x + limite_max_x) / 2.0, (limite_min_y + limite_max_y) / 2.0)
 
 
 # ==========================================
@@ -222,9 +248,9 @@ func iniciar_saque_arco(equipo: String):
 	
 	var pos_saque = Vector2.ZERO
 	if equipo == "local":
-		pos_saque = Vector2(250, 500)
+		pos_saque = Vector2(limite_min_x + 140, 500)
 	else:
-		pos_saque = Vector2(1850, 500)
+		pos_saque = Vector2(limite_max_x - 140, 500)
 	
 	pelota.global_position = pos_saque
 	pelota.linear_velocity = Vector2.ZERO
@@ -325,15 +351,23 @@ func _physics_process(_delta):
 	var pos = pelota.global_position
 	var vel = pelota.linear_velocity
 	
-	# Límites del campo (ajustados a mundo.tscn)
+	# Límites del campo
 	var choco = false
 	if pos.x < limite_min_x:
-		# Solo saque si no es gol (Y fuera de rango de portería)
-		if pos.y < 400 or pos.y > 600:
+		if modo_juego == "1v1":
+			# En 1v1 la pelota rebota siempre, no hay saque de arco
+			pos.x = limite_min_x
+			vel.x = abs(vel.x) * 0.8
+			choco = true
+		elif pos.y < 400 or pos.y > 600:
 			iniciar_saque_arco("local")
 			return
 	elif pos.x > limite_max_x:
-		if pos.y < 400 or pos.y > 600:
+		if modo_juego == "1v1":
+			pos.x = limite_max_x
+			vel.x = -abs(vel.x) * 0.8
+			choco = true
+		elif pos.y < 400 or pos.y > 600:
 			iniciar_saque_arco("visitante")
 			return
 		
