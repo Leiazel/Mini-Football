@@ -72,17 +72,23 @@ position = Vector2(1059, 493)
 zoom = Vector2(0.85, 0.85)
 limit_left = -10000001
 
-[node name="Label" type="Label" parent="." unique_id=1496411309]
-offset_left = 927.0
-offset_top = 9.0
-offset_right = 1219.0
-offset_bottom = 69.0
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Label" type="Label" parent="CanvasLayer" unique_id=1496411309]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -146.0
+offset_top = 15.0
+offset_right = 146.0
+offset_bottom = 75.0
+grow_horizontal = 2
 theme_override_font_sizes/font_size = 28
 text = "  0 -0"
 script = ExtResource("7_t8jxu")
 
 [node name="Porteria_i" type="Area2D" parent="." unique_id=1638008257]
-position = Vector2(74, 505)
+position = Vector2(110, 505)
 script = ExtResource("7_2hh7m")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Porteria_i" unique_id=1555010627]
@@ -92,7 +98,7 @@ shape = SubResource("RectangleShape2D_pfhxm")
 [node name="ZonaTiro" type="Marker2D" parent="Porteria_i" unique_id=766211635]
 
 [node name="Porteria_d" type="Area2D" parent="." unique_id=1848058249]
-position = Vector2(2031, 517)
+position = Vector2(2010, 517)
 script = ExtResource("7_2hh7m")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Porteria_d" unique_id=1415712149]

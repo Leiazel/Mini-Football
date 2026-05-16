@@ -25,6 +25,7 @@ var timer_ia_saque: float = 0.0
 var CENTRO_PELOTA: Vector2 = Vector2(1050, 525)  # Centro del campo por defecto
 
 var modo_juego: String = "6v6"
+var es_multijugador: bool = false
 
 # Limites dinámicos del campo
 var limite_min_x: float = 110.0
@@ -34,6 +35,7 @@ var limite_max_y: float = 1025.0
 
 
 func _ready():
+	_configurar_inputs()
 	_configurar_fisica_pelota()
 
 	var datos_web = obtener_datos_web()
@@ -41,6 +43,8 @@ func _ready():
 		print("Datos recibidos de la web: ", datos_web)
 		if datos_web.has("modoJuego"):
 			modo_juego = datos_web.modoJuego
+		if datos_web.has("multijugador"):
+			es_multijugador = datos_web.multijugador
 		
 		instanciar_equipo(datos_web.local, "local")
 		instanciar_equipo(datos_web.visitante, "visitante")
@@ -66,8 +70,37 @@ func _ready():
 	# Iniciar el kickoff después de que todos los jugadores existan
 	call_deferred("iniciar_kickoff", "local")
 
+func _configurar_inputs():
+	var acciones = {
+		"p1_left": [KEY_A],
+		"p1_right": [KEY_D],
+		"p1_up": [KEY_W],
+		"p1_down": [KEY_S],
+		"p1_patear": [KEY_SPACE],
+		"p1_cambiar": [KEY_Q],
+		"p2_left": [KEY_LEFT],
+		"p2_right": [KEY_RIGHT],
+		"p2_up": [KEY_UP],
+		"p2_down": [KEY_DOWN],
+		"p2_patear": [KEY_SHIFT],
+		"p2_cambiar": [KEY_ENTER]
+	}
+	for accion in acciones:
+		if not InputMap.has_action(accion):
+			InputMap.add_action(accion)
+		# Limpiamos si hay previos
+		InputMap.action_erase_events(accion)
+		for tecla in acciones[accion]:
+			var evento = InputEventKey.new()
+			# Para teclas físicas comunes (letras, espacio), usamos physical_keycode. Para especiales (flechas), keycode.
+			if tecla < 4000000:
+				evento.physical_keycode = tecla
+			else:
+				evento.keycode = tecla
+			InputMap.action_add_event(accion, evento)
+
 func _ajustar_cancha_segun_modo():
-	if modo_juego == "3v3":
+	if modo_juego == "3v3" or modo_juego == "1v1":
 		limite_min_x = 450.0
 		limite_max_x = 1650.0
 		# Mover las porterías físicamente si existen en el nodo
@@ -99,7 +132,9 @@ func iniciar_kickoff(equipo_que_saca: String = "local"):
 	if has_node("AvisoSaque"):
 		var text = "SAQUE DE CENTRO: " + equipo_que_saca.to_upper()
 		if equipo_que_saca == "local":
-			text += "\nPresiona ESPACIO o C para patear"
+			text += "\nPresiona ESPACIO para patear"
+		elif es_multijugador:
+			text += "\nPresiona SHIFT para patear"
 		$AvisoSaque.text = text
 		$AvisoSaque.visible = true
 
@@ -119,20 +154,28 @@ func _process(delta: float):
 
 	if kickoff_activo:
 		if equipo_kickoff == "local":
-			if Input.is_action_just_pressed("patear"):
+			if Input.is_action_just_pressed("p1_patear"):
 				_finalizar_kickoff()
 		else:
-			timer_kickoff_ia += delta
-			if timer_kickoff_ia >= 1.5:
-				_finalizar_kickoff()
+			if es_multijugador:
+				if Input.is_action_just_pressed("p2_patear"):
+					_finalizar_kickoff()
+			else:
+				timer_kickoff_ia += delta
+				if timer_kickoff_ia >= 1.5:
+					_finalizar_kickoff()
 	elif saque_arco_activo:
 		if equipo_saque_arco == "local":
-			if Input.is_action_just_pressed("patear"):
+			if Input.is_action_just_pressed("p1_patear"):
 				_finalizar_saque_arco()
 		else:
-			timer_ia_saque += delta
-			if timer_ia_saque >= 1.5:
-				_finalizar_saque_arco()
+			if es_multijugador:
+				if Input.is_action_just_pressed("p2_patear"):
+					_finalizar_saque_arco()
+			else:
+				timer_ia_saque += delta
+				if timer_ia_saque >= 1.5:
+					_finalizar_saque_arco()
 
 	# --- CÁMARA ---
 	if camera and pelota:
@@ -187,7 +230,12 @@ func iniciar_saque_arco(equipo: String):
 	pelota.linear_velocity = Vector2.ZERO
 	
 	if has_node("AvisoSaque"):
-		$AvisoSaque.text = "SAQUE DE ARCO: " + equipo.to_upper() + "\nPresiona C o ESPACIO"
+		if equipo == "local":
+			$AvisoSaque.text = "SAQUE DE ARCO: " + equipo.to_upper() + "\nPresiona ESPACIO"
+		elif es_multijugador:
+			$AvisoSaque.text = "SAQUE DE ARCO: " + equipo.to_upper() + "\nPresiona SHIFT"
+		else:
+			$AvisoSaque.text = "SAQUE DE ARCO: " + equipo.to_upper()
 		$AvisoSaque.visible = true
 	
 	for p in get_tree().get_nodes_in_group("local"):
@@ -232,24 +280,29 @@ func _finalizar_saque_arco():
 		p.desactivar_saque_arco()
 		
 func _unhandled_input(event):
-	if event is InputEventKey and event.pressed and not event.echo:
-		if event.keycode == KEY_Q:
-			_cambiar_jugador_activo()
+	if event.is_action_pressed("p1_cambiar"):
+		_cambiar_jugador_activo("local", 1)
+	elif event.is_action_pressed("p2_cambiar") and es_multijugador:
+		_cambiar_jugador_activo("visitante", 2)
 
-func _cambiar_jugador_activo():
-	var local_players = get_tree().get_nodes_in_group("local")
+func _cambiar_jugador_activo(equipo_id: String, jugador_id: int):
+	var players = get_tree().get_nodes_in_group(equipo_id)
 	var mas_cercano = null
 	var min_dist = INF
 	
-	for p in local_players:
+	for p in players:
 		var dist = p.global_position.distance_to(pelota.global_position)
 		if dist < min_dist:
 			min_dist = dist
 			mas_cercano = p
 			
 	if mas_cercano:
-		for p in local_players:
-			p.es_humano = (p == mas_cercano)
+		for p in players:
+			if p == mas_cercano:
+				p.es_humano = true
+				p.id_jugador = jugador_id
+			else:
+				p.es_humano = false
 
 
 # ==========================================
@@ -279,18 +332,10 @@ func _physics_process(_delta):
 		if pos.y < 400 or pos.y > 600:
 			iniciar_saque_arco("local")
 			return
-		else:
-			pos.x = limite_min_x
-			vel.x = abs(vel.x) * 0.8
-			choco = true
 	elif pos.x > limite_max_x:
 		if pos.y < 400 or pos.y > 600:
 			iniciar_saque_arco("visitante")
 			return
-		else:
-			pos.x = limite_max_x
-			vel.x = -abs(vel.x) * 0.8
-			choco = true
 		
 	if pos.y < limite_min_y:
 		pos.y = limite_min_y
@@ -346,6 +391,8 @@ func instanciar_equipo(datos_jugadores: Array, equipo: String):
 			match rol_jugador:
 				"DEF": x_pos = 600
 				"DEL": x_pos = 950
+		elif modo_juego == "1v1":
+			x_pos = 950
 
 		if equipo == "visitante":
 			if rol_jugador == "DEL":
@@ -375,13 +422,18 @@ func instanciar_equipo(datos_jugadores: Array, equipo: String):
 		if equipo == "local":
 			inst.porteria_propia  = porteria_i
 			inst.porteria_enemiga = porteria_d
-			if not ya_hay_humano and (rol_jugador == "DEL" or rol_jugador == "MED"):
+			if not ya_hay_humano and (rol_jugador == "DEL" or rol_jugador == "MED" or modo_juego == "1v1"):
 				inst.es_humano = true
+				inst.id_jugador = 1
 				ya_hay_humano  = true
 		else:
 			inst.porteria_propia  = porteria_d
 			inst.porteria_enemiga = porteria_i
-			inst.es_humano        = false
+			inst.es_humano = false
+			if es_multijugador and not ya_hay_humano and (rol_jugador == "DEL" or rol_jugador == "MED" or modo_juego == "1v1"):
+				inst.es_humano = true
+				inst.id_jugador = 2
+				ya_hay_humano  = true
 
 		add_child(inst)
 		print("Spawneado ", nombre_jugador, " (", rol_jugador, ") - ", equipo)

@@ -16,7 +16,7 @@ func _ready():
 	
 	# Configurar Panel de Fondo (Estilo Transmisión de TV)
 	panel_fondo.custom_minimum_size = Vector2(300, 40)
-	panel_fondo.position = Vector2(-50, 0)
+	panel_fondo.position = Vector2(0, 0)
 	var estilo = StyleBoxFlat.new()
 	estilo.bg_color = Color(0.1, 0.1, 0.1, 0.8)
 	estilo.border_width_bottom = 2

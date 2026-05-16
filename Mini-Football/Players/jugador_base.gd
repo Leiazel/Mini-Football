@@ -5,6 +5,7 @@ class_name JugadorBase
 	set(value):
 		es_humano = value
 		queue_redraw()
+@export var id_jugador: int = 0
 @export var equipo: String = "local"
 @export var rol: String = "MED"
 @export var velocidad_normal: float = 145.0
@@ -99,9 +100,10 @@ func _draw():
 	if es_humano:
 		var r = 28.0
 		var opacidad = 0.4 + 0.15 * sin(_tiempo_aurora * 4.0)
+		var color_humano = Color(0.2, 0.8, 1.0, opacidad) if id_jugador == 1 else Color(1.0, 0.3, 0.2, opacidad)
 		# Indicador premium para el humano
-		draw_arc(Vector2(0, 24), r, 0.0, TAU, 32, Color(1, 1, 1, opacidad), 3.0)
-		draw_arc(Vector2(0, 24), r + 4, 0.0, TAU, 32, Color(1, 1, 1, opacidad * 0.4), 1.0)
+		draw_arc(Vector2(0, 24), r, 0.0, TAU, 32, color_humano, 3.0)
+		draw_arc(Vector2(0, 24), r + 4, 0.0, TAU, 32, Color(color_humano.r, color_humano.g, color_humano.b, opacidad * 0.4), 1.0)
 
 
 # ==========================================
@@ -117,7 +119,13 @@ func _physics_process(delta: float):
 	if es_humano:
 		logica_humano(delta)
 		# Buffer de pateo
-		if Input.is_action_just_pressed("patear"):
+		var patear_pressed = false
+		if id_jugador == 1:
+			patear_pressed = Input.is_action_just_pressed("p1_patear")
+		elif id_jugador == 2:
+			patear_pressed = Input.is_action_just_pressed("p2_patear")
+		
+		if patear_pressed:
 			intencion_patear = 0.2
 		if intencion_patear > 0:
 			intencion_patear -= delta
@@ -147,7 +155,20 @@ func logica_ia_kickoff(delta: float):
 
 # ==========================================
 func logica_humano(_delta: float):
-	direccion = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	direccion = Vector2.ZERO
+	if id_jugador == 1:
+		if Input.is_physical_key_pressed(KEY_A) or Input.is_key_pressed(KEY_A): direccion.x -= 1
+		if Input.is_physical_key_pressed(KEY_D) or Input.is_key_pressed(KEY_D): direccion.x += 1
+		if Input.is_physical_key_pressed(KEY_W) or Input.is_key_pressed(KEY_W): direccion.y -= 1
+		if Input.is_physical_key_pressed(KEY_S) or Input.is_key_pressed(KEY_S): direccion.y += 1
+	elif id_jugador == 2:
+		if Input.is_physical_key_pressed(KEY_LEFT) or Input.is_key_pressed(KEY_LEFT): direccion.x -= 1
+		if Input.is_physical_key_pressed(KEY_RIGHT) or Input.is_key_pressed(KEY_RIGHT): direccion.x += 1
+		if Input.is_physical_key_pressed(KEY_UP) or Input.is_key_pressed(KEY_UP): direccion.y -= 1
+		if Input.is_physical_key_pressed(KEY_DOWN) or Input.is_key_pressed(KEY_DOWN): direccion.y += 1
+	
+	if direccion.length() > 0:
+		direccion = direccion.normalized()
 	# Boost de velocidad para el humano para que se sienta ágil
 	velocidad_actual = velocidad_normal * 1.2
 
@@ -375,7 +396,13 @@ func evaluar_pateo_o_pase(pelota_rb: RigidBody2D, direccion_golpe: Vector2):
 	var pos_arco_pr  = porteria_propia.global_position
 	
 	if es_humano:
-		if intencion_patear > 0 or Input.is_action_pressed("patear"):
+		var patear_held = false
+		if id_jugador == 1:
+			patear_held = Input.is_action_pressed("p1_patear")
+		elif id_jugador == 2:
+			patear_held = Input.is_action_pressed("p2_patear")
+			
+		if intencion_patear > 0 or patear_held:
 			pelota_rb.apply_central_impulse(direccion_golpe * 2220.0)
 			iniciar_cooldown_pateo()
 			intencion_patear = 0.0
@@ -443,6 +470,9 @@ func permitir_remate():
 
 func activar_kickoff():
 	en_kickoff = true
+	global_position = posicion_inicial
+	velocidad_actual = 0.0
+	direccion = Vector2.ZERO
 
 func desactivar_kickoff():
 	en_kickoff = false
@@ -450,6 +480,9 @@ func desactivar_kickoff():
 func activar_saque_arco(equipo_que_saca: String):
 	en_saque_arco = true
 	equipo_saque = equipo_que_saca
+	global_position = posicion_inicial
+	velocidad_actual = 0.0
+	direccion = Vector2.ZERO
 
 func desactivar_saque_arco():
 	en_saque_arco = false
