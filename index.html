@@ -21,10 +21,17 @@
 
         <div class="formation-controls" style="margin-bottom: 15px;">
             <div class="team-selector">
+                <h3>MODO JUEGO</h3>
+                <div class="button-group" id="group-multijugador">
+                    <button id="btn-multi-toggle" class="btn-formation" onclick="toggleMulti(this)">1 VS 1 LOCAL: DESACTIVADO</button>
+                </div>
+            </div>
+            <div class="team-selector">
                 <h3>FORMATO</h3>
                 <div class="button-group" id="group-formato">
                     <button class="btn-formation active" onclick="cambiarFormato('6v6', this)">6 VS 6</button>
                     <button class="btn-formation" onclick="cambiarFormato('3v3', this)">3 VS 3</button>
+                    <button class="btn-formation" onclick="cambiarFormato('1v1', this)">1 VS 1</button>
                 </div>
             </div>
         </div>
@@ -51,9 +58,22 @@
                         <span class="btn-icon">🎲</span>
                     </button>
                 </div>
-                <div
-                    style="color: #93c5fd; font-size: 0.85rem; margin-top: 10px; font-weight: 500; text-align: center;">
-                    🎮 Controlarás al jugador con la aurora blanca. Pulsa <b>Q</b> en el juego para cambiar.
+                <div style="color: #93c5fd; font-size: 0.85rem; margin-top: 10px; font-weight: 500; text-align: center; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px;">
+                    <div style="margin-bottom: 5px; color: #fff;">🎮 <b>CONTROLES MULTIJUGADOR LOCAL</b></div>
+                    <div style="display: flex; justify-content: space-around; font-size: 0.8rem;">
+                        <div>
+                            <b style="color: #60a5fa;">TU EQUIPO (P1)</b><br>
+                            Mover: <b>WASD</b><br>
+                            Patear: <b>ESPACIO</b><br>
+                            Cambiar Jugador: <b>Q</b>
+                        </div>
+                        <div>
+                            <b style="color: #f87171;">RIVAL (P2)</b><br>
+                            Mover: <b>FLECHAS</b><br>
+                            Patear: <b>SHIFT DERECHO</b><br>
+                            Cambiar Jugador: <b>ENTER</b>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -371,40 +391,58 @@
         }
 
         let formatoActual = '6v6';
+        let esMultijugador = false;
+
+        function toggleMulti(btn) {
+            esMultijugador = !esMultijugador;
+            if (esMultijugador) {
+                btn.classList.add('active');
+                btn.innerText = '1 VS 1 LOCAL: ACTIVADO';
+            } else {
+                btn.classList.remove('active');
+                btn.innerText = '1 VS 1 LOCAL: DESACTIVADO';
+            }
+        }
         function cambiarFormato(formato, btn) {
             btn.parentElement.querySelectorAll('.btn-formation').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             formatoActual = formato;
 
-            document.getElementById('subtitulo-draft').innerText = formato === '3v3' ? 'Arma tu equipo 3 vs 3 (1 DEF, 2 DEL)' : 'Arma tu equipo 6 vs 6 para el partido';
+            if (formato === '3v3') {
+                document.getElementById('subtitulo-draft').innerText = 'Arma tu equipo 3 vs 3 (1 DEF, 2 DEL)';
+            } else if (formato === '1v1') {
+                document.getElementById('subtitulo-draft').innerText = 'Arma tu equipo 1 vs 1 (1 DEL)';
+            } else {
+                document.getElementById('subtitulo-draft').innerText = 'Arma tu equipo 6 vs 6 para el partido';
+            }
 
             const zLocal = document.getElementById('zona-local');
             const zVisitante = document.getElementById('zona-visitante');
 
-            if (formato === '3v3') {
+            if (formato === '3v3' || formato === '1v1') {
                 document.getElementById('selector-local').style.display = 'none';
                 document.getElementById('selector-visitante').style.display = 'none';
 
                 [zLocal, zVisitante].forEach(zona => {
-                    // Mover las cartas de vuelta al mazo si están en las posiciones 4, 5, 6
-                    [4, 5, 6].forEach(i => {
-                        const carta = zona.querySelector(`.pos-${i} .carta`);
-                        if (carta) document.getElementById('mazo').appendChild(carta);
-                        zona.querySelector(`.pos-${i}`).style.display = 'none';
-                    });
+                    const numPlayers = formato === '3v3' ? 3 : 1;
+                    const roles = formato === '3v3' ? ['DEF', 'DEL', 'DEL'] : ['DEL'];
 
-                    // Configurar 3v3: 1 DEF, 2 DEL
-                    const roles3v3 = ['DEF', 'DEL', 'DEL'];
-                    [1, 2, 3].forEach((pos, idx) => {
+                    [1, 2, 3, 4, 5, 6].forEach((pos, idx) => {
                         const slot = zona.querySelector(`.pos-${pos}`);
-                        slot.dataset.slotRol = roles3v3[idx];
-                        const etq = slot.querySelector('.etiqueta');
-                        if (etq) etq.innerText = roles3v3[idx];
+                        if (idx >= numPlayers) {
+                            const carta = slot.querySelector('.carta');
+                            if (carta) document.getElementById('mazo').appendChild(carta);
+                            slot.style.display = 'none';
+                        } else {
+                            slot.style.display = 'flex';
+                            slot.dataset.slotRol = roles[idx];
+                            const etq = slot.querySelector('.etiqueta');
+                            if (etq) etq.innerText = roles[idx];
 
-                        // Devolver la carta si no coincide con el nuevo rol
-                        const carta = slot.querySelector('.carta');
-                        if (carta && carta.dataset.rol !== roles3v3[idx] && roles3v3[idx] !== 'CUALQUIERA') {
-                            document.getElementById('mazo').appendChild(carta);
+                            const carta = slot.querySelector('.carta');
+                            if (carta && carta.dataset.rol !== roles[idx] && roles[idx] !== 'CUALQUIERA') {
+                                document.getElementById('mazo').appendChild(carta);
+                            }
                         }
                     });
                 });
@@ -413,12 +451,11 @@
                 document.getElementById('selector-visitante').style.display = 'block';
 
                 [zLocal, zVisitante].forEach(zona => {
-                    [4, 5, 6].forEach(i => {
-                        zona.querySelector(`.pos-${i}`).style.display = 'flex';
+                    [1, 2, 3, 4, 5, 6].forEach(pos => {
+                        zona.querySelector(`.pos-${pos}`).style.display = 'flex';
                     });
                 });
 
-                // Forzar el redibujado de las formaciones de 6v6 actuales
                 const btnLocal = document.querySelector('#group-local .active');
                 if (btnLocal) btnLocal.click();
                 const btnVisit = document.querySelector('#group-visitante .active');
@@ -475,7 +512,7 @@
                 const slL = primerSlotLibre('zona-local', carta.dataset.rol);
                 const slV = primerSlotLibre('zona-visitante', carta.dataset.rol);
 
-                const reqJugadores = formatoActual === '3v3' ? 3 : 6;
+                const reqJugadores = formatoActual === '3v3' ? 3 : (formatoActual === '1v1' ? 1 : 6);
                 const bL = document.createElement('button');
                 bL.className = 'btn-action btn-local';
                 bL.innerHTML = '🔵 Tu Equipo';
@@ -548,7 +585,7 @@
             const zonas = ['zona-local', 'zona-visitante'];
 
             zonas.forEach(zonaId => {
-                const maxSlots = formatoActual === '3v3' ? 3 : 6;
+                const maxSlots = formatoActual === '3v3' ? 3 : (formatoActual === '1v1' ? 1 : 6);
                 const allSlots = [...document.getElementById(zonaId).querySelectorAll('.posicion')];
                 const slots = allSlots.slice(0, maxSlots);
 
@@ -582,7 +619,7 @@
                 const el = p.querySelector('.carta');
                 if (el) tV.push({ nombre: el.dataset.player, rol: p.dataset.slotRol });
             });
-            const reqJugadores = formatoActual === '3v3' ? 3 : 6;
+            const reqJugadores = formatoActual === '3v3' ? 3 : (formatoActual === '1v1' ? 1 : 6);
             if (tL.length < reqJugadores || tV.length < reqJugadores) {
                 alert(`¡Debes colocar exactamente ${reqJugadores} jugadores en cada equipo antes de jugar!`);
                 return;
@@ -590,6 +627,7 @@
             const matchData = {
                 local: tL, visitante: tV,
                 modoJuego: formatoActual,
+                multijugador: esMultijugador,
                 formacionLocal: document.getElementById('select-formacion-local').value,
                 formacionVisitante: document.getElementById('select-formacion-visitante').value
             };
